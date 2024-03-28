@@ -10,7 +10,10 @@ function CreateExpenseForm({
   expenseCategories: any[];
 }) {
   const date = new Date(expensesDate).toDateString();
-  const createExpenseActionWithDateArg = createExpenseAction.bind(null, expensesDate);
+  const createExpenseActionWithDateArg = createExpenseAction.bind(
+    null,
+    expensesDate
+  );
   return (
     <div className="flex flex-col gap-y-3">
       <h2 className="rounded-lg bg-gray-100 p-3 mt-3 font-semibold text-lg">
@@ -42,7 +45,7 @@ function CreateExpenseForm({
             Choose Category
           </label>
           <select id="category-dd" name="category" className="p-2">
-            <option value="" disabled selected>
+            <option value="" disabled>
               Select expense category
             </option>
             {expenseCategories.map((ctgry: any) => (

@@ -30,8 +30,10 @@ export const fetchExpenses = async (date: string) => {
     client: MongoClient
   ) {
     const db = client.db("expense-tracker-db");
-    const categories = await db.collection("Expense").find({ date: eDate });
-    return categories.toArray();
+    const expenses = await (
+      await db.collection("Expense").find({ date: eDate })
+    ).toArray();
+    return expenses;
   });
   return expenses;
 };

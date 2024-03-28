@@ -30,6 +30,6 @@ export async function createExpenseAction(
     console.log(createExpenseRes);
   });
 
-  revalidatePath(`/expenses/${expenseDate}`);
+  revalidatePath(`/expenses/${expenseDate}`)
   redirect(`/expenses/${expenseDate}`);
 }
