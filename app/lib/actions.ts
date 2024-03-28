@@ -12,13 +12,16 @@ const FormSchema = z.object({
   category: z.string(),
 });
 
-export async function createExpenseAction(date: string, formData: FormData) {
+export async function createExpenseAction(
+  expenseDate: string,
+  formData: FormData
+) {
   const { title, amount, category } = FormSchema.parse({
     title: formData.get("title"),
     amount: formData.get("amount"),
     category: formData.get("category"),
   });
-
+  const date = new Date(expenseDate).toDateString();
   await withDatabaseOperation(async function (client: MongoClient) {
     const db = client.db("expense-tracker-db");
     const createExpenseRes = await db
@@ -27,6 +30,6 @@ export async function createExpenseAction(date: string, formData: FormData) {
     console.log(createExpenseRes);
   });
 
-  revalidatePath("/expenses");
-  redirect("/expenses");
+  revalidatePath(`/expenses/${expenseDate}`);
+  redirect(`/expenses/${expenseDate}`);
 }
