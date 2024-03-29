@@ -13,17 +13,21 @@ import React from "react";
 function ExpensesList({
   className,
   expensesDate,
-  expenses,
+  expenses = [],
 }: {
   className: string;
   expensesDate: string;
   expenses: Expense[];
 }) {
   const date = new Date(expensesDate).toDateString();
+  const totalExpense = expenses.reduce(
+    (acc, curr: any) => acc + curr.amount,
+    0
+  );
   return (
     <div className={`${className} flex flex-col`}>
-      <div className="flex flex-row justify-between">
-        <h2>Expenses For {date}</h2>
+      <div className="flex flex-row justify-between rounded-lg px-4 py-2 bg-gray-100">
+        <h2 className="text-lg font-medium">Expenses For {date}</h2>
         <Link href={`/expenses/${expensesDate}/new`}>
           <PlusCircleIcon color="gray" width={24} height={24} />
         </Link>
@@ -51,6 +55,10 @@ function ExpensesList({
           )}
         </Disclosure>
       ))}
+      <div className="flex flex-row justify-between rounded-lg mt-2 px-4 py-2 font-medium bg-gray-100">
+        <h3>Total</h3>
+        <h3>{totalExpense}</h3>
+      </div>
     </div>
   );
 }
