@@ -4,7 +4,7 @@ const uri = process.env.MONGODB_URI || "";
 
 export async function withDatabaseOperation(
   operation: (client: MongoClient) => Promise<any>
-): Promise<void> {
+): Promise<any> {
   let client = null;
   try {
     client = new MongoClient(uri, {
@@ -19,6 +19,9 @@ export async function withDatabaseOperation(
     return result;
   } catch (error: any) {
     console.error("Database Error: ", error);
+    return {
+      message: `Database Error: ${error.message}`,
+    };
   } finally {
     if (client) await client.close();
   }

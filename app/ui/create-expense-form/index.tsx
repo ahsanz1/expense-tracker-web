@@ -30,6 +30,7 @@ function CreateExpenseForm({
             placeholder="Title"
             step="1"
             className="p-2"
+            required
           ></input>
           <label htmlFor="amount-input" className="mt-2 font-semibold">
             Enter PKR amount
@@ -40,11 +41,12 @@ function CreateExpenseForm({
             placeholder="Amount"
             step="1"
             className="p-2"
+            required
           ></input>
           <label htmlFor="category-dd" className="mt-2 font-semibold">
             Choose Category
           </label>
-          <select id="category-dd" name="category" className="p-2">
+          <select id="category-dd" name="category" className="p-2" required>
             <option value="" disabled>
               Select expense category
             </option>
