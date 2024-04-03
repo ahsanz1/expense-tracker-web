@@ -12,6 +12,10 @@ const FormSchema = z.object({
   category: z.string(),
 });
 
+const CategoryFormSchema = z.object({
+  categoryName: z.string(),
+});
+
 export async function createExpenseAction(
   expenseDate: string,
   formData: FormData
@@ -30,6 +34,22 @@ export async function createExpenseAction(
     console.log(createExpenseRes);
   });
 
-  revalidatePath(`/expenses/${expenseDate}`)
+  revalidatePath(`/expenses/${expenseDate}`);
   redirect(`/expenses/${expenseDate}`);
+}
+
+export async function createCategoryAction(formData: FormData) {
+  const { categoryName: name } = CategoryFormSchema.parse({
+    categoryName: formData.get("category-name"),
+  });
+
+  await withDatabaseOperation(async function (client: MongoClient) {
+    const db = client.db("expense-tracker-db");
+    const createCategoryRes = await db
+      .collection("Category")
+      .insertOne({ name });
+    console.log(createCategoryRes);
+  });
+
+  redirect(`/`);
 }

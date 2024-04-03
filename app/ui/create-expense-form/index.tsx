@@ -28,8 +28,8 @@ function CreateExpenseForm({
             id="title-input"
             name="title"
             placeholder="Title"
-            step="1"
             className="p-2"
+            type="text"
             required
           ></input>
           <label htmlFor="amount-input" className="mt-2 font-semibold">

@@ -17,6 +17,9 @@ function NavLinks() {
       </IconButton>
       {open && (
         <div className="flex flex-col items-start gap-y-1 w-screen absolute top-12 left-0 z-10 bg-gray-100">
+          <Link href={"/category/new"} className="border-b-2 p-3 w-full">
+            New Category
+          </Link>{" "}
           <Link href={"/analytics"} className="border-b-2 p-3 w-full">
             Analytics
           </Link>{" "}

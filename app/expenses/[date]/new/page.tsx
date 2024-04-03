@@ -6,12 +6,10 @@ async function Page({ params }: { params: { date: string } }) {
   const expensesDate = params.date;
   const categories: any = await fetchCategories();
   return (
-    <main>
-      <CreateExpenseForm
-        expensesDate={expensesDate}
-        expenseCategories={categories}
-      />
-    </main>
+    <CreateExpenseForm
+      expensesDate={expensesDate}
+      expenseCategories={categories}
+    />
   );
 }
 
