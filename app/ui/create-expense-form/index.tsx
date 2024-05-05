@@ -1,4 +1,5 @@
 import { createExpenseAction } from "@/app/lib/actions";
+import { sortByKeyName } from "@/app/lib/utils";
 import Link from "next/link";
 import React from "react";
 
@@ -10,6 +11,7 @@ function CreateExpenseForm({
   expenseCategories: any[];
 }) {
   const date = new Date(expensesDate).toDateString();
+  const sortedExpenseCategories = sortByKeyName(expenseCategories, "name");
   const createExpenseActionWithDateArg = createExpenseAction.bind(
     null,
     expensesDate
@@ -50,7 +52,7 @@ function CreateExpenseForm({
             <option value="" disabled>
               Select expense category
             </option>
-            {expenseCategories.map((ctgry: any) => (
+            {sortedExpenseCategories.map((ctgry: any) => (
               <option value={ctgry.name} key={ctgry.name}>
                 {ctgry.name}
               </option>

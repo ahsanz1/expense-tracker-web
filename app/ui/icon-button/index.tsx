@@ -6,8 +6,8 @@ function IconButton({
   onClick,
   children,
 }: Readonly<{
-  className: string;
-  onClick: (e: React.MouseEvent) => void;
+  className?: string;
+  onClick: (e: React.MouseEvent, idx?: number) => void;
   children: React.ReactNode;
 }>) {
   return (

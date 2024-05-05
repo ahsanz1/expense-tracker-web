@@ -10,6 +10,13 @@ function NavLinks() {
     e.preventDefault();
     setIsOpen(!open);
   };
+  const date = new Date()
+    .toLocaleString("default", {
+      month: "short",
+      year: "numeric",
+    })
+    .toLowerCase()
+    .replaceAll(" ", "-");
   return (
     <>
       <IconButton className="md:hidden" onClick={handleMenuIconClick}>
@@ -20,7 +27,7 @@ function NavLinks() {
           <Link href={"/category/new"} className="border-b-2 p-3 w-full">
             New Category
           </Link>{" "}
-          <Link href={"/analytics"} className="border-b-2 p-3 w-full">
+          <Link href={`/analytics/${date}`} className="border-b-2 p-3 w-full">
             Analytics
           </Link>{" "}
           <Link href={"/Login"} className="border-b-2 p-3 w-full">

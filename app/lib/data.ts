@@ -1,17 +1,5 @@
-import { Document, MongoClient, WithId } from "mongodb";
+import { MongoClient } from "mongodb";
 import { withDatabaseOperation } from "./mongo";
-import { dbCategories } from "./static";
-import { Expense } from "./types";
-
-export const createCategories = async () => {
-  await withDatabaseOperation(async function (client: MongoClient) {
-    const db = client.db("expense-tracker-db");
-    const insertCategoriesRes = await db
-      .collection("Category")
-      .insertMany(dbCategories);
-    console.log(insertCategoriesRes);
-  });
-};
 
 export const fetchCategories = async () => {
   const categories = await withDatabaseOperation(async function (
@@ -32,6 +20,21 @@ export const fetchExpenses = async (date: string) => {
     const db = client.db("expense-tracker-db");
     const expenses = await (
       await db.collection("Expense").find({ date: eDate })
+    ).toArray();
+    return expenses;
+  });
+  return expenses;
+};
+
+export const fetchExpensesForMonth = async (month: string) => {
+  const expenses = await withDatabaseOperation(async function (
+    client: MongoClient
+  ) {
+    const db = client.db("expense-tracker-db");
+    const expenses = await (
+      await db
+        .collection("Expense")
+        .find({ date: { $regex: month, $options: "i" } })
     ).toArray();
     return expenses;
   });

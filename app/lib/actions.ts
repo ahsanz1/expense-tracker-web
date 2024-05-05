@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { withDatabaseOperation } from "./mongo";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
+import { dbCategories } from "./static";
 
 const FormSchema = z.object({
   title: z.string(),
@@ -53,3 +54,27 @@ export async function createCategoryAction(formData: FormData) {
 
   redirect(`/`);
 }
+
+export const createCategoriesFromFile = async () => {
+  await withDatabaseOperation(async function (client: MongoClient) {
+    const db = client.db("expense-tracker-db");
+    const insertCategoriesRes = await db
+      .collection("Category")
+      .insertMany(dbCategories);
+    console.log(insertCategoriesRes);
+  });
+};
+
+export const deleteExpenseAction = async (id: string, expenseDate: string) => {
+  const deleteResult = await withDatabaseOperation(async function (
+    client: MongoClient
+  ) {
+    const db = client.db("expense-tracker-db");
+    const deleteResult = await await db
+      .collection("Expense")
+      .deleteOne({ _id: new ObjectId(id) });
+    return deleteResult;
+  });
+  revalidatePath(`/expenses/${expenseDate}`);
+  return deleteResult;
+};

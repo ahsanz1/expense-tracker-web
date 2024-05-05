@@ -11,7 +11,7 @@ function MobileNav({
     <div className={className}>
       <div className="flex flex-row justify-between items-center">
         <Link href="/">
-          <h3>Expense Tracker</h3>
+          <h3 className="text-xl font-semibold">Expense Tracker</h3>
         </Link>
         <NavLinks />
       </div>

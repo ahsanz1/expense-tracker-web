@@ -8,7 +8,7 @@ function DesktopNav({
 }>) {
   return (
     <div className={className}>
-      <h2>Expense Tracker</h2>
+      <h2 className="text-3xl font-semibold">Expense Tracker</h2>
       <NavLinks />
     </div>
   );

@@ -19,3 +19,14 @@ export function CreateExpenseFormSkeleton() {
     </div>
   );
 }
+
+export function BarChartSkeletion({ noOfBars }: { noOfBars: number }) {
+  const count = new Array(noOfBars).fill(0);
+  return (
+    <div className="flex flex-row gap-x-3 mt-3">
+      {count.map((c, idx) => (
+        <Skeleton height={350} width={20} key={idx} />
+      ))}
+    </div>
+  );
+}
