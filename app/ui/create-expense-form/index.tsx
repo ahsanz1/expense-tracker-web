@@ -2,10 +2,11 @@ import { createExpenseAction } from "@/app/lib/actions";
 import { sortByKeyName } from "@/app/lib/utils";
 import Link from "next/link";
 import React from "react";
+import FormButton from "../button";
 
 function CreateExpenseForm({
   expensesDate,
-  expenseCategories,
+  expenseCategories = [],
 }: {
   expensesDate: string;
   expenseCategories: any[];
@@ -65,9 +66,11 @@ function CreateExpenseForm({
             >
               Cancel
             </Link>
-            <button type="submit" className="px-4 py-2 bg-blue-400 rounded-lg">
-              Save
-            </button>
+            <FormButton
+              type="submit"
+              className="px-4 py-2 bg-blue-400 rounded-lg"
+              btnText="Save"
+            />
           </div>
         </div>
       </form>

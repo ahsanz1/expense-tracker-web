@@ -1,6 +1,7 @@
 import { createCategoryAction } from "@/app/lib/actions";
 import Link from "next/link";
 import React from "react";
+import FormButton from "../button";
 
 function CreateCategoryForm() {
   return (
@@ -25,9 +26,11 @@ function CreateCategoryForm() {
             <Link href={`/`} className="px-4 py-2 bg-white rounded-lg">
               Cancel
             </Link>
-            <button type="submit" className="px-4 py-2 bg-blue-400 rounded-lg">
-              Save
-            </button>
+            <FormButton
+              type="submit"
+              className="px-4 py-2 bg-blue-400 rounded-lg"
+              btnText="Save"
+            />
           </div>
         </div>
       </form>

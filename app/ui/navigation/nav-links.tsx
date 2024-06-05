@@ -1,11 +1,26 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import IconButton from "../icon-button";
 import MenuBars from "../icons/menu-bars";
+import { usePathname } from "next/navigation";
 
 function NavLinks() {
   const [open, setIsOpen] = useState<Boolean>(false);
+  const [prevPathName, setPrevPathName] = useState<String>("");
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!prevPathName) {
+      setPrevPathName(pathname);
+      return;
+    }
+    if (pathname !== prevPathName) {
+      setIsOpen(false);
+      setPrevPathName(pathname);
+    }
+  }, [pathname]);
+
   const handleMenuIconClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsOpen(!open);
