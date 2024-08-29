@@ -12,8 +12,8 @@ const getFormattedDate = (date: Date) => {
 
 const DateRangeExpenses = () => {
   const [dateRange, setDateRange] = useState({
-    startDate: getFormattedDate(new Date()),
-    endDate: getFormattedDate(new Date()),
+    startDate: "",
+    endDate: "",
   });
   const [loading, setLoading] = useState(false);
   const [dateRangeExpenses, setDateRangeExpenses] = useState([]);
@@ -90,8 +90,13 @@ const DateRangeExpenses = () => {
             setDateRangeExpenses([]);
           }}
           max={getFormattedDate(new Date())}
+          disabled={dateRange.startDate === ""}
         />
-        <button className="rounded-lg px-2 bg-gray-100 w-[20%]" onClick={handleSearch}>
+        <button
+          className="rounded-lg px-2 bg-gray-100 w-[20%]"
+          onClick={handleSearch}
+          disabled={dateRange.startDate === "" || dateRange.endDate === ""}
+        >
           {loading ? (
             <div className="animate-spin rounded-full my-0 mx-auto h-[24px] w-[24px] border-t-2 border-b-2 border-purple-500"></div>
           ) : (
