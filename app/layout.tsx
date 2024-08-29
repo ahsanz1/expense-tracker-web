@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "react-loading-skeleton/dist/skeleton.css";
+import 'react-toastify/dist/ReactToastify.css';
 import Navigation from "./ui/navigation";
 
 const inter = Inter({ subsets: ["latin"] });

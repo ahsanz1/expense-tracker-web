@@ -17,10 +17,7 @@ const CategoryFormSchema = z.object({
   categoryName: z.string(),
 });
 
-export async function createExpenseAction(
-  expenseDate: string,
-  formData: FormData
-) {
+export async function createExpenseAction(expenseDate: string, formData: FormData) {
   const { title, amount, category } = FormSchema.parse({
     title: formData.get("title"),
     amount: formData.get("amount"),
@@ -29,9 +26,7 @@ export async function createExpenseAction(
   const date = new Date(expenseDate).toDateString();
   await withDatabaseOperation(async function (client: MongoClient) {
     const db = client.db("expense-tracker-db");
-    const createExpenseRes = await db
-      .collection("Expense")
-      .insertOne({ title, amount, category, date });
+    const createExpenseRes = await db.collection("Expense").insertOne({ title, amount, category, date });
     console.log(createExpenseRes);
   });
 
@@ -46,9 +41,7 @@ export async function createCategoryAction(formData: FormData) {
 
   await withDatabaseOperation(async function (client: MongoClient) {
     const db = client.db("expense-tracker-db");
-    const createCategoryRes = await db
-      .collection("Category")
-      .insertOne({ name });
+    const createCategoryRes = await db.collection("Category").insertOne({ name });
     console.log(createCategoryRes);
   });
 
@@ -58,23 +51,28 @@ export async function createCategoryAction(formData: FormData) {
 export const createCategoriesFromFile = async () => {
   await withDatabaseOperation(async function (client: MongoClient) {
     const db = client.db("expense-tracker-db");
-    const insertCategoriesRes = await db
-      .collection("Category")
-      .insertMany(dbCategories);
+    const insertCategoriesRes = await db.collection("Category").insertMany(dbCategories);
     console.log(insertCategoriesRes);
   });
 };
 
 export const deleteExpenseAction = async (id: string, expenseDate: string) => {
-  const deleteResult = await withDatabaseOperation(async function (
-    client: MongoClient
-  ) {
+  const deleteResult = await withDatabaseOperation(async function (client: MongoClient) {
     const db = client.db("expense-tracker-db");
-    const deleteResult = await await db
-      .collection("Expense")
-      .deleteOne({ _id: new ObjectId(id) });
+    const deleteResult = await await db.collection("Expense").deleteOne({ _id: new ObjectId(id) });
     return deleteResult;
   });
   revalidatePath(`/expenses/${expenseDate}`);
   return deleteResult;
+};
+
+export const updateExpenseAction = async (id: string, field: string, value: string | number) => {
+  const updateResult = await withDatabaseOperation(async function (client: MongoClient) {
+    const db = client.db("expense-tracker-db");
+    const updateResult = await await db
+      .collection("Expense")
+      .updateOne({ _id: new ObjectId(id) }, { $set: { [field]: value } });
+    return updateResult;
+  });
+  return updateResult;
 };
