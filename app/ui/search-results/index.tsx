@@ -30,7 +30,10 @@ const SearchResults = (
       </div>
       <div className="mt-5 flex flex-col gap-y-2">
         {hits.map((h) => (
-          <div className="rounded-lg px-4 py-2 bg-gray-100 w-full">
+          <div
+            className="rounded-lg px-4 py-2 bg-gray-100 w-full"
+            key={h.isoDate}
+          >
             <h2 className="text-base font-medium">
               {h.title}
             </h2>
