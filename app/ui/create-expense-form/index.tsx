@@ -45,6 +45,7 @@ function CreateExpenseForm({
             step="1"
             className="p-2"
             required
+            type="number"
           ></input>
           <label htmlFor="category-dd" className="mt-2 font-semibold">
             Choose Category
