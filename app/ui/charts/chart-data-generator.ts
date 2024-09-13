@@ -23,7 +23,7 @@ export const getChartData = ({
       },
       title: {
         display: true,
-        text: `Expenses For ${month.toUpperCase()} ${year.toUpperCase()}`,
+        text: `Expenses For ${month.toUpperCase()} ${year}`,
       },
     },
   };

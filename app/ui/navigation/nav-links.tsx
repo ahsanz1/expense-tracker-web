@@ -25,13 +25,17 @@ function NavLinks() {
     e.preventDefault();
     setIsOpen(!open);
   };
-  const date = new Date()
+  let date = new Date()
     .toLocaleString("default", {
       month: "short",
       year: "numeric",
     })
     .toLowerCase()
     .replaceAll(" ", "-");
+
+  if (date.includes("sept")) {
+    date = date.replace("sept", "sep");
+  }
   return (
     <>
       <IconButton className="md:hidden" onClick={handleMenuIconClick}>
