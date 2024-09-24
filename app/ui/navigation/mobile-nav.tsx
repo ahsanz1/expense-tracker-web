@@ -16,7 +16,7 @@ function MobileNav({
             Expense Tracker
           </h3>
           <img
-            src="favicon.ico"
+            src="/favicon.ico"
             className="w-9 h-9 md:hidden"
           ></img>
         </Link>

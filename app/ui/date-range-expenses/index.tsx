@@ -1,5 +1,8 @@
 "use client";
 
+import { Expense } from "@/app/lib/types";
+import { Disclosure } from "@headlessui/react";
+import { ChevronUpIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -7,7 +10,9 @@ const getFormattedDate = (date: Date) => {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const monthDate = date.getDate();
-  return `${year}-${month < 10 ? `0${month}` : month}-${monthDate < 10 ? `0${monthDate}` : monthDate}`;
+  return `${year}-${month < 10 ? `0${month}` : month}-${
+    monthDate < 10 ? `0${monthDate}` : monthDate
+  }`;
 };
 
 const DateRangeExpenses = () => {
@@ -41,7 +46,10 @@ const DateRangeExpenses = () => {
   let totalExpenseBetweenDateRange = 0;
 
   if (dateRangeExpenses.length > 0) {
-    totalExpenseBetweenDateRange = dateRangeExpenses.reduce((acc, curr: any) => acc + curr.amount, 0);
+    totalExpenseBetweenDateRange = dateRangeExpenses.reduce(
+      (acc, curr: any) => acc + curr.amount,
+      0
+    );
   }
 
   return (
@@ -104,10 +112,40 @@ const DateRangeExpenses = () => {
           )}
         </button>
       </div>
+      <div className="date-range-expenses">
+        {dateRangeExpenses.map((expense: Expense) => (
+          <Disclosure key={String(expense._id)}>
+            {({ open }) => (
+              <>
+                <Disclosure.Button className="flex w-full justify-between rounded-lg bg-purple-100 mt-2 px-4 py-2 hover:bg-purple-200 focus:outline-none focus-visible:ring focus-visible:ring-purple-500/75">
+                  <div className="flex flex-row justify-between w-full text-left text-sm font-medium text-purple-900">
+                    <p>
+                      {expense.title} - {String(expense.amount)}
+                    </p>
+                  </div>
+                  <ChevronUpIcon
+                    className={`${
+                      open ? "rotate-180 transform" : ""
+                    } h-5 w-5 text-purple-500`}
+                  />
+                </Disclosure.Button>
+                <Disclosure.Panel className="px-1 pb-2 pt-2 text-sm text-gray-500">
+                  <p className="border-b py-2">{expense.title}</p>
+                  <p className="border-b py-2">{String(expense.amount)}</p>
+                  <p className="border-b py-2">{expense.category}</p>
+                  <p className="border-b py-2">{expense.date}</p>
+                </Disclosure.Panel>
+              </>
+            )}
+          </Disclosure>
+        ))}
+      </div>
       {dateRangeExpenses.length > 0 && (
         <div className="rounded-lg px-4 py-2 bg-gray-100 flex flex-row justify-between">
           <h2 className="text-lg font-medium">Total Expense</h2>
-          <h2 className="text-lg font-medium">{totalExpenseBetweenDateRange}</h2>
+          <h2 className="text-lg font-medium">
+            {totalExpenseBetweenDateRange}
+          </h2>
         </div>
       )}
     </div>
