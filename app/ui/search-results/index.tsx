@@ -23,7 +23,7 @@ const SearchResults = (
         <h1 className="text-3xl font-semibold text-black mb-2">Search Results</h1>
         {query && (
           <p className="text-gray-600">
-            Results for: <span className="font-medium text-black">"{query}"</span>
+            Results for: <span className="font-medium text-black">&quot;{query}&quot;</span>
           </p>
         )}
       </div>
@@ -38,7 +38,7 @@ const SearchResults = (
             <div className="flex flex-row justify-between items-center">
               <h2 className="text-lg font-semibold text-black">
                 Total Expense For{" "}
-                {`"${query}"`}
+                &quot;{query}&quot;
               </h2>
               <h2 className="text-xl font-semibold text-black">
                 PKR {total.toString()}
