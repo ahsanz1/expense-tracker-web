@@ -42,23 +42,44 @@ function NavLinks() {
         <MenuBars />
       </IconButton>
       {open && (
-        <div className="flex flex-col items-start gap-y-1 w-screen absolute top-12 left-0 z-10 bg-gray-100">
-          <Link href={"/category/new"} className="border-b-2 p-3 w-full">
+        <div className="flex flex-col items-start gap-y-0 w-screen absolute top-12 left-0 z-10 bg-white border-b border-gray-200 shadow-lg">
+          <Link 
+            href={"/category/new"} 
+            className="border-b border-gray-200 p-4 w-full text-black hover:bg-gray-50 transition-colors"
+          >
             New Category
-          </Link>{" "}
-          <Link href={`/analytics/${date}`} className="border-b-2 p-3 w-full">
+          </Link>
+          <Link 
+            href={`/analytics/${date}`} 
+            className="border-b border-gray-200 p-4 w-full text-black hover:bg-gray-50 transition-colors"
+          >
             Analytics
-          </Link>{" "}
-          <Link href={"/Login"} className="border-b-2 p-3 w-full">
+          </Link>
+          <Link 
+            href={"/Login"} 
+            className="p-4 w-full text-black hover:bg-gray-50 transition-colors"
+          >
             Login
           </Link>
         </div>
       )}
-      <div className="hidden md:flex flex-row justify-between gap-x-2 bg-gray-100">
-        <Link href={"/analytics"} className="p-3">
+      <div className="hidden md:flex flex-row justify-between gap-x-4">
+        <Link 
+          href={`/analytics/${date}`} 
+          className="px-4 py-2 text-black hover:text-gray-600 transition-colors font-medium"
+        >
           Analytics
-        </Link>{" "}
-        <Link href={"/Login"} className="p-3">
+        </Link>
+        <Link 
+          href={"/category/new"} 
+          className="px-4 py-2 text-black hover:text-gray-600 transition-colors font-medium"
+        >
+          New Category
+        </Link>
+        <Link 
+          href={"/Login"} 
+          className="px-4 py-2 text-black hover:text-gray-600 transition-colors font-medium"
+        >
           Login
         </Link>
       </div>

@@ -52,7 +52,9 @@ export const getChartData = ({
       {
         label: "Expense By Day",
         data: labels.map((l, idx) => totalExpenseOnEachDay[idx]),
-        backgroundColor: "rgba(53, 162, 235, 0.5)",
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        borderColor: "rgba(0, 0, 0, 1)",
+        borderWidth: 1,
       },
     ],
   };

@@ -1,5 +1,35 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { withDatabaseOperation } from "./mongo";
+
+/**
+ * Converts MongoDB documents to plain JavaScript objects
+ * by converting ObjectId instances to strings
+ */
+function serializeMongoData<T>(data: T): T {
+  if (data === null || data === undefined) {
+    return data;
+  }
+
+  if (data instanceof ObjectId) {
+    return data.toString() as unknown as T;
+  }
+
+  if (Array.isArray(data)) {
+    return data.map((item) => serializeMongoData(item)) as unknown as T;
+  }
+
+  if (typeof data === "object" && data.constructor === Object) {
+    const serialized: any = {};
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        serialized[key] = serializeMongoData((data as any)[key]);
+      }
+    }
+    return serialized as T;
+  }
+
+  return data;
+}
 
 export const fetchCategories = async () => {
   const categories = await withDatabaseOperation(async function (
@@ -9,7 +39,7 @@ export const fetchCategories = async () => {
     const categories = await (await db.collection("Category").find()).toArray();
     return categories;
   });
-  return categories;
+  return serializeMongoData(categories);
 };
 
 export const fetchExpenses = async (date: string) => {
@@ -23,7 +53,7 @@ export const fetchExpenses = async (date: string) => {
     ).toArray();
     return expenses;
   });
-  return expenses;
+  return serializeMongoData(expenses);
 };
 
 export const fetchAllExpenses = async () => {
@@ -34,7 +64,7 @@ export const fetchAllExpenses = async () => {
     const expenses = await (await db.collection("Expense").find()).toArray();
     return expenses;
   });
-  return expenses;
+  return serializeMongoData(expenses);
 };
 
 export const fetchExpensesForMonth = async (month: string) => {
@@ -52,7 +82,7 @@ export const fetchExpensesForMonth = async (month: string) => {
     ).toArray();
     return expenses;
   });
-  return expenses;
+  return serializeMongoData(expenses);
 };
 
 export const fetchExpensesBetweenDateRange = async (
@@ -73,7 +103,7 @@ export const fetchExpensesBetweenDateRange = async (
     ).toArray();
     return expenses;
   });
-  return expenses;
+  return serializeMongoData(expenses);
 };
 
 export const searchExpenses = async (searchTerm: string) => {
@@ -101,5 +131,5 @@ export const searchExpenses = async (searchTerm: string) => {
     ).toArray();
     return expenses;
   });
-  return expenses;
+  return serializeMongoData(expenses);
 };

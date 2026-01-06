@@ -43,7 +43,7 @@ const SearchInput = () => {
         }}
         type="text"
         placeholder="Search..."
-        className="w-full p-2 pl-4 pr-10 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full p-2 pl-4 pr-10 text-black bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
       />
       <IconButton
         onClick={handleSearch}

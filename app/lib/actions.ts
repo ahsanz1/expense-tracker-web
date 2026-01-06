@@ -17,6 +17,8 @@ const CategoryFormSchema = z.object({
   categoryName: z.string(),
 });
 
+const MultipleExpensesSchema = z.array(FormSchema);
+
 export async function createExpenseAction(
   expenseDate: string,
   formData: FormData
@@ -34,6 +36,36 @@ export async function createExpenseAction(
       .collection("Expense")
       .insertOne({ title, amount, category, date, isoDate });
     console.log(createExpenseRes);
+  });
+
+  revalidatePath(`/expenses/${expenseDate}`);
+  redirect(`/expenses/${expenseDate}`);
+}
+
+export async function createMultipleExpensesAction(
+  expenseDate: string,
+  expenses: Array<{ title: string; amount: number; category: string }>
+) {
+  const validatedExpenses = MultipleExpensesSchema.parse(expenses);
+  const date = new Date(expenseDate).toDateString();
+  const isoDate = new Date(expenseDate).toISOString();
+  
+  const expensesToInsert = validatedExpenses.map((expense) => ({
+    title: expense.title,
+    amount: expense.amount,
+    category: expense.category,
+    date,
+    isoDate,
+  }));
+
+  await withDatabaseOperation(async function (client: MongoClient) {
+    const db = client.db("expense-tracker-db");
+    if (expensesToInsert.length > 0) {
+      const createExpensesRes = await db
+        .collection("Expense")
+        .insertMany(expensesToInsert);
+      console.log(createExpensesRes);
+    }
   });
 
   revalidatePath(`/expenses/${expenseDate}`);

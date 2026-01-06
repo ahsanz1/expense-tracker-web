@@ -4,6 +4,7 @@ import {
   fetchExpensesForMonth,
 } from "@/app/lib/data";
 import ExpensesList from "@/app/ui/expenses-list";
+import ExpensesTable from "@/app/ui/expenses-table";
 import React from "react";
 
 async function Page({ params }: { params: { date: string } }) {
@@ -19,12 +20,23 @@ async function Page({ params }: { params: { date: string } }) {
     0
   );
   return (
-    <main>
-      <div className="flex flex-col items-center gap-y-4 mt-8 w-full">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Mobile View */}
+      <div className="md:hidden">
         <ExpensesList
-          className="w-full md:hidden"
+          className="w-full"
           expensesDate={date}
-          expenses={JSON.parse(JSON.stringify(expenses))}
+          expenses={expenses}
+          monthTotal={monthTotal}
+        />
+      </div>
+      
+      {/* Desktop View */}
+      <div className="hidden md:block">
+        <ExpensesTable
+          className="w-full"
+          expensesDate={date}
+          expenses={expenses}
           monthTotal={monthTotal}
         />
       </div>

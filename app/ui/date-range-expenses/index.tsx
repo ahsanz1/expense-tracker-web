@@ -53,100 +53,115 @@ const DateRangeExpenses = () => {
   }
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <div className="rounded-lg px-4 py-2 bg-gray-100">
-        <h2 className="text-lg font-medium">Date Range</h2>
-      </div>
-      <div className="flex flex-row justify-between gap-x-2">
-        <input
-          type="date"
-          className="border-2 p-1 rounded-lg w-[40%]"
-          onChange={(e) => {
-            e.preventDefault();
-            const { value } = e.target;
-            const newStartDate = new Date(value);
-            const endDate = new Date(dateRange.endDate);
-            if (newStartDate > endDate) {
-              toast.error("Start date should preceed the end date!");
-              return;
-            }
-            setDateRange({
-              ...dateRange,
-              startDate: getFormattedDate(newStartDate),
-            });
-            setDateRangeExpenses([]);
-          }}
-          value={dateRange.startDate}
-        />
-        <input
-          type="date"
-          className="border-2 p-1 rounded-lg w-[40%]"
-          value={dateRange.endDate}
-          onChange={(e) => {
-            e.preventDefault();
-            const { value } = e.target;
-            const newEndDate = new Date(value);
-            const startDate = new Date(dateRange.startDate);
-            if (newEndDate < startDate) {
-              toast.error("End date must follow the start date!");
-              return;
-            }
-            setDateRange({
-              ...dateRange,
-              endDate: getFormattedDate(newEndDate),
-            });
-            setDateRangeExpenses([]);
-          }}
-          max={getFormattedDate(new Date())}
-          disabled={dateRange.startDate === ""}
-        />
-        <button
-          className="rounded-lg px-2 bg-gray-100 w-[20%]"
-          onClick={handleSearch}
-          disabled={dateRange.startDate === "" || dateRange.endDate === ""}
-        >
-          {loading ? (
-            <div className="animate-spin rounded-full my-0 mx-auto h-[24px] w-[24px] border-t-2 border-b-2 border-purple-500"></div>
-          ) : (
-            "Search"
-          )}
-        </button>
-      </div>
-      <div className="date-range-expenses">
-        {dateRangeExpenses.map((expense: Expense) => (
-          <Disclosure key={String(expense._id)}>
-            {({ open }) => (
-              <>
-                <Disclosure.Button className="flex w-full justify-between rounded-lg bg-purple-100 mt-2 px-4 py-2 hover:bg-purple-200 focus:outline-none focus-visible:ring focus-visible:ring-purple-500/75">
-                  <div className="flex flex-row justify-between w-full text-left text-sm font-medium text-purple-900">
-                    <p>
-                      {expense.title} - {String(expense.amount)}
-                    </p>
-                  </div>
-                  <ChevronUpIcon
-                    className={`${
-                      open ? "rotate-180 transform" : ""
-                    } h-5 w-5 text-purple-500`}
-                  />
-                </Disclosure.Button>
-                <Disclosure.Panel className="px-1 pb-2 pt-2 text-sm text-gray-500">
-                  <p className="border-b py-2">{expense.title}</p>
-                  <p className="border-b py-2">{String(expense.amount)}</p>
-                  <p className="border-b py-2">{expense.category}</p>
-                  <p className="border-b py-2">{expense.date}</p>
-                </Disclosure.Panel>
-              </>
-            )}
-          </Disclosure>
-        ))}
-      </div>
-      {dateRangeExpenses.length > 0 && (
-        <div className="rounded-lg px-4 py-2 bg-gray-100 flex flex-row justify-between">
-          <h2 className="text-lg font-medium">Total Expense</h2>
-          <h2 className="text-lg font-medium">
-            {totalExpenseBetweenDateRange}
-          </h2>
+    <div className="flex flex-col gap-y-4 border border-gray-200 rounded-lg p-6 bg-white">
+      <h2 className="text-xl font-semibold text-black mb-4">Date Range Expenses</h2>
+      <div className="flex flex-col sm:flex-row justify-between gap-3">
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+          <input
+            type="date"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+            onChange={(e) => {
+              e.preventDefault();
+              const { value } = e.target;
+              const newStartDate = new Date(value);
+              const endDate = new Date(dateRange.endDate);
+              if (newStartDate > endDate) {
+                toast.error("Start date should preceed the end date!");
+                return;
+              }
+              setDateRange({
+                ...dateRange,
+                startDate: getFormattedDate(newStartDate),
+              });
+              setDateRangeExpenses([]);
+            }}
+            value={dateRange.startDate}
+          />
         </div>
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+          <input
+            type="date"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            value={dateRange.endDate}
+            onChange={(e) => {
+              e.preventDefault();
+              const { value } = e.target;
+              const newEndDate = new Date(value);
+              const startDate = new Date(dateRange.startDate);
+              if (newEndDate < startDate) {
+                toast.error("End date must follow the start date!");
+                return;
+              }
+              setDateRange({
+                ...dateRange,
+                endDate: getFormattedDate(newEndDate),
+              });
+              setDateRangeExpenses([]);
+            }}
+            max={getFormattedDate(new Date())}
+            disabled={dateRange.startDate === ""}
+          />
+        </div>
+        <div className="flex items-end">
+          <button
+            className="w-full sm:w-auto px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+            onClick={handleSearch}
+            disabled={dateRange.startDate === "" || dateRange.endDate === "" || loading}
+          >
+            {loading ? (
+              <div className="animate-spin rounded-full my-0 mx-auto h-[20px] w-[20px] border-2 border-white border-t-transparent"></div>
+            ) : (
+              "Search"
+            )}
+          </button>
+        </div>
+      </div>
+      
+      {dateRangeExpenses.length > 0 && (
+        <>
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="divide-y divide-gray-200">
+                {dateRangeExpenses.map((expense: Expense) => (
+                  <Disclosure key={String(expense._id)}>
+                    {({ open }) => (
+                      <>
+                        <Disclosure.Button className="flex w-full justify-between rounded-lg border-0 px-4 py-3 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-black transition-colors">
+                          <div className="flex flex-row justify-between w-full text-left text-sm font-medium text-black">
+                            <p>
+                              {expense.title} - PKR {String(expense.amount)}
+                            </p>
+                          </div>
+                          <ChevronUpIcon
+                            className={`${
+                              open ? "rotate-180 transform" : ""
+                            } h-5 w-5 text-gray-600 transition-transform`}
+                          />
+                        </Disclosure.Button>
+                        <Disclosure.Panel className="px-4 pb-3 pt-2 text-sm text-gray-600 bg-gray-50">
+                          <p className="border-b border-gray-200 py-2"><span className="font-medium">Title:</span> {expense.title}</p>
+                          <p className="border-b border-gray-200 py-2"><span className="font-medium">Amount:</span> PKR {String(expense.amount)}</p>
+                          <p className="border-b border-gray-200 py-2"><span className="font-medium">Category:</span> {expense.category}</p>
+                          <p className="py-2"><span className="font-medium">Date:</span> {expense.date}</p>
+                        </Disclosure.Panel>
+                      </>
+                    )}
+                  </Disclosure>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 border border-gray-200 rounded-lg px-6 py-4 bg-gray-50">
+            <div className="flex flex-row justify-between items-center">
+              <h2 className="text-lg font-semibold text-black">Total Expense</h2>
+              <h2 className="text-xl font-semibold text-black">
+                PKR {totalExpenseBetweenDateRange}
+              </h2>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

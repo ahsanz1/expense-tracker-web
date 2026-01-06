@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import DeleteExpenseModal from "../delete-expense-modal";
-import { ObjectId } from "mongodb";
 
 function ExpensesList({
   className,
@@ -84,55 +83,71 @@ function ExpensesList({
   };
 
   return (
-    <div className={`${className} flex flex-col h-screen`} {...swipeHandlers}>
-      <div className="flex flex-row justify-between rounded-lg px-4 py-2 bg-gray-100">
-        <h2 className="text-lg font-medium">Expenses For {date}</h2>
-        <Link href={`/expenses/${expensesDate}/new`}>
-          <PlusCircleIcon color="gray" width={24} height={24} />
+    <div className={`${className} flex flex-col`} {...swipeHandlers}>
+      <div className="flex flex-row justify-between items-center border-b border-gray-200 pb-4 mb-4">
+        <h2 className="text-xl font-semibold text-black">Expenses For {date}</h2>
+        <Link 
+          href={`/expenses/${expensesDate}/new`}
+          className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+        >
+          <PlusCircleIcon className="h-6 w-6 text-black" />
         </Link>
       </div>
-      {expenses.map((expense: Expense, idx) => (
-        <Disclosure key={String(expense._id)}>
-          {({ open }) => (
-            <>
-              <Disclosure.Button className="flex w-full justify-between rounded-lg bg-purple-100 mt-2 px-4 py-2 hover:bg-purple-200 focus:outline-none focus-visible:ring focus-visible:ring-purple-500/75">
-                <div className="flex flex-row justify-between w-full text-left text-sm font-medium text-purple-900">
-                  <p>
-                    {expense.title} - {String(expense.amount)}
-                  </p>
-                  <div className="flex flex-row gap-x-2 mr-2">
-                    <PencilSquareIcon className="h-5 w-5 text-purple-400" />
-                    <TrashIcon
-                      className="h-5 w-5 text-purple-400"
-                      onClick={(e) =>
-                        openDeleteModal(e, expense._id?.toString())
-                      }
+      
+      {expenses.length === 0 ? (
+        <div className="text-center py-12 border border-gray-200 rounded-lg">
+          <p className="text-gray-500">No expenses for this date</p>
+        </div>
+      ) : (
+        <>
+          {expenses.map((expense: Expense, idx) => (
+            <Disclosure key={String(expense._id)}>
+              {({ open }) => (
+                <>
+                  <Disclosure.Button className="flex w-full justify-between rounded-lg border border-gray-200 mt-2 px-4 py-3 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-black transition-colors">
+                    <div className="flex flex-row justify-between w-full text-left text-sm font-medium text-black">
+                      <p>
+                        {expense.title} - PKR {String(expense.amount)}
+                      </p>
+                      <div className="flex flex-row gap-x-2 mr-2">
+                        <PencilSquareIcon className="h-5 w-5 text-gray-600" />
+                        <TrashIcon
+                          className="h-5 w-5 text-gray-600 hover:text-red-600 transition-colors"
+                          onClick={(e) =>
+                            openDeleteModal(e, expense._id?.toString())
+                          }
+                        />
+                      </div>
+                    </div>
+                    <ChevronUpIcon
+                      className={`${
+                        open ? "rotate-180 transform" : ""
+                      } h-5 w-5 text-gray-600 transition-transform`}
                     />
-                  </div>
-                </div>
-                <ChevronUpIcon
-                  className={`${
-                    open ? "rotate-180 transform" : ""
-                  } h-5 w-5 text-purple-500`}
-                />
-              </Disclosure.Button>
-              <Disclosure.Panel className="px-1 pb-2 pt-2 text-sm text-gray-500">
-                <p className="border-b py-2">{expense.title}</p>
-                <p className="border-b py-2">{String(expense.amount)}</p>
-                <p className="border-b py-2">{expense.category}</p>
-              </Disclosure.Panel>
-            </>
-          )}
-        </Disclosure>
-      ))}
-      <div className="flex flex-row justify-between rounded-lg mt-2 px-4 py-2 font-medium bg-gray-100">
-        <h3>Total</h3>
-        <h3>{totalExpense}</h3>
-      </div>
-      <div className="flex flex-row justify-between rounded-lg mt-2 px-4 py-2 font-medium bg-gray-100">
-        <h3>Month Total</h3>
-        <h3>{monthTotal.toString()}</h3>
-      </div>
+                  </Disclosure.Button>
+                  <Disclosure.Panel className="px-4 pb-3 pt-2 text-sm text-gray-600 border-l border-r border-b border-gray-200 rounded-b-lg">
+                    <p className="border-b border-gray-100 py-2"><span className="font-medium">Title:</span> {expense.title}</p>
+                    <p className="border-b border-gray-100 py-2"><span className="font-medium">Amount:</span> PKR {String(expense.amount)}</p>
+                    <p className="py-2"><span className="font-medium">Category:</span> {expense.category}</p>
+                  </Disclosure.Panel>
+                </>
+              )}
+            </Disclosure>
+          ))}
+          
+          <div className="mt-4 space-y-2">
+            <div className="flex flex-row justify-between rounded-lg border border-gray-200 px-4 py-3 bg-gray-50">
+              <h3 className="font-semibold text-black">Daily Total</h3>
+              <h3 className="font-semibold text-black">PKR {totalExpense}</h3>
+            </div>
+            <div className="flex flex-row justify-between rounded-lg border border-gray-200 px-4 py-3 bg-gray-50">
+              <h3 className="font-semibold text-black">Month Total</h3>
+              <h3 className="font-semibold text-black">PKR {monthTotal.toString()}</h3>
+            </div>
+          </div>
+        </>
+      )}
+      
       <DeleteExpenseModal
         isOpen={showModal}
         onCloseModal={closeDeleteModal}

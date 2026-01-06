@@ -11,14 +11,10 @@ function MobileNav({
   return (
     <div className={className}>
       <div className="flex flex-row justify-between gap-x-2 items-center">
-        <Link href="/">
-          <h3 className="hidden text-xl font-semibold md:block">
+        <Link href="/" className="flex items-center">
+          <h3 className="text-xl font-semibold text-black">
             Expense Tracker
           </h3>
-          <img
-            src="/favicon.ico"
-            className="w-9 h-9 md:hidden"
-          ></img>
         </Link>
         <SearchInput />
         <NavLinks />
