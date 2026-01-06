@@ -25,17 +25,7 @@ function NavLinks() {
     e.preventDefault();
     setIsOpen(!open);
   };
-  let date = new Date()
-    .toLocaleString("default", {
-      month: "short",
-      year: "numeric",
-    })
-    .toLowerCase()
-    .replaceAll(" ", "-");
 
-  if (date.includes("sept")) {
-    date = date.replace("sept", "sep");
-  }
   return (
     <>
       <IconButton className="md:hidden" onClick={handleMenuIconClick}>
@@ -44,13 +34,13 @@ function NavLinks() {
       {open && (
         <div className="flex flex-col items-start gap-y-0 w-screen absolute top-12 left-0 z-10 bg-white border-b border-gray-200 shadow-lg">
           <Link 
-            href={"/category/new"} 
+            href={"/categories"} 
             className="border-b border-gray-200 p-4 w-full text-black hover:bg-gray-50 transition-colors"
           >
-            New Category
+            Categories
           </Link>
           <Link 
-            href={`/analytics/${date}`} 
+            href={"/analytics"} 
             className="border-b border-gray-200 p-4 w-full text-black hover:bg-gray-50 transition-colors"
           >
             Analytics
@@ -65,16 +55,16 @@ function NavLinks() {
       )}
       <div className="hidden md:flex flex-row justify-between gap-x-4">
         <Link 
-          href={`/analytics/${date}`} 
+          href={"/analytics"} 
           className="px-4 py-2 text-black hover:text-gray-600 transition-colors font-medium"
         >
           Analytics
         </Link>
         <Link 
-          href={"/category/new"} 
+          href={"/categories"} 
           className="px-4 py-2 text-black hover:text-gray-600 transition-colors font-medium"
         >
-          New Category
+          Categories
         </Link>
         <Link 
           href={"/Login"} 

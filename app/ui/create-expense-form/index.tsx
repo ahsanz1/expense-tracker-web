@@ -2,6 +2,7 @@
 
 import { createMultipleExpensesAction } from "@/app/lib/actions";
 import { sortByKeyName } from "@/app/lib/utils";
+import CategorySearchInput from "@/app/ui/category-search-input";
 import Link from "next/link";
 import React, { useState } from "react";
 import { PlusCircleIcon, XMarkIcon } from "@heroicons/react/16/solid";
@@ -149,24 +150,15 @@ function CreateExpenseForm({
                   >
                     Category
                   </label>
-                  <select
+                  <CategorySearchInput
                     id={`category-${index}`}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
-                    required
+                    categories={sortedExpenseCategories}
                     value={expense.category}
-                    onChange={(e) =>
-                      updateExpense(index, "category", e.target.value)
+                    onChange={(value) =>
+                      updateExpense(index, "category", value)
                     }
-                  >
-                    <option value="" disabled>
-                      Select category
-                    </option>
-                    {sortedExpenseCategories.map((ctgry: any) => (
-                      <option value={ctgry.name} key={ctgry.name}>
-                        {ctgry.name}
-                      </option>
-                    ))}
-                  </select>
+                    required
+                  />
                 </div>
               </div>
             </div>
