@@ -103,7 +103,7 @@ export const deleteExpenseAction = async (id: string, expenseDate: string) => {
     client: MongoClient
   ) {
     const db = client.db("expense-tracker-db");
-    const deleteResult = await await db
+    const deleteResult = await db
       .collection("Expense")
       .deleteOne({ _id: new ObjectId(id) });
     return deleteResult;
@@ -112,19 +112,31 @@ export const deleteExpenseAction = async (id: string, expenseDate: string) => {
   return deleteResult;
 };
 
-export const updateExpenseAction = async (
-  id: string,
-  field: string,
-  value: string | number
-) => {
-  const updateResult = await withDatabaseOperation(async function (
-    client: MongoClient
-  ) {
-    const db = client.db("expense-tracker-db");
-    const updateResult = await await db
-      .collection("Expense")
-      .updateOne({ _id: new ObjectId(id) }, { $set: { [field]: value } });
-    return updateResult;
+export async function updateExpenseAction(
+  expenseId: string,
+  expenseDate: string,
+  formData: FormData
+) {
+  const { title, amount, category } = FormSchema.parse({
+    title: formData.get("title"),
+    amount: formData.get("amount"),
+    category: formData.get("category"),
   });
-  return updateResult;
-};
+  
+  const date = new Date(expenseDate).toDateString();
+  const isoDate = new Date(expenseDate).toISOString();
+  
+  await withDatabaseOperation(async function (client: MongoClient) {
+    const db = client.db("expense-tracker-db");
+    const updateResult = await db
+      .collection("Expense")
+      .updateOne(
+        { _id: new ObjectId(expenseId) },
+        { $set: { title, amount, category, date, isoDate } }
+      );
+    console.log(updateResult);
+  });
+
+  revalidatePath(`/expenses/${expenseDate}`);
+  redirect(`/expenses/${expenseDate}`);
+}

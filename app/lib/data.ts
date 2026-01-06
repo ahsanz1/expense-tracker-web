@@ -133,3 +133,16 @@ export const searchExpenses = async (searchTerm: string) => {
   });
   return serializeMongoData(expenses);
 };
+
+export const fetchExpenseById = async (id: string) => {
+  const expense = await withDatabaseOperation(async function (
+    client: MongoClient
+  ) {
+    const db = client.db("expense-tracker-db");
+    const expense = await db.collection("Expense").findOne({
+      _id: new ObjectId(id),
+    });
+    return expense;
+  });
+  return serializeMongoData(expense);
+};

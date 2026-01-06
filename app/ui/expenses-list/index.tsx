@@ -110,9 +110,15 @@ function ExpensesList({
                         {expense.title} - PKR {String(expense.amount)}
                       </p>
                       <div className="flex flex-row gap-x-2 mr-2">
-                        <PencilSquareIcon className="h-5 w-5 text-gray-600" />
+                        <Link
+                          href={`/expenses/${expensesDate}/${expense._id}/edit`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-gray-600 hover:text-black transition-colors"
+                        >
+                          <PencilSquareIcon className="h-5 w-5" />
+                        </Link>
                         <TrashIcon
-                          className="h-5 w-5 text-gray-600 hover:text-red-600 transition-colors"
+                          className="h-5 w-5 text-gray-600 hover:text-red-600 transition-colors cursor-pointer"
                           onClick={(e) =>
                             openDeleteModal(e, expense._id?.toString())
                           }
