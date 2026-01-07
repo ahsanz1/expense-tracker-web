@@ -1,4 +1,4 @@
-import { updateExpenseAction } from "./actions";
+import { updateExpenseField } from "./actions";
 import { fetchAllExpenses } from "./data";
 import { Expense } from "./types";
 
@@ -9,8 +9,8 @@ export const addISOdateToEachDocument = async () => {
   );
 
   for (let i = 0; i < expensesWithoutISOdate.length; i++) {
-    const updateResult = await updateExpenseAction(
-      expensesWithoutISOdate[i]._id,
+    const updateResult = await updateExpenseField(
+      expensesWithoutISOdate[i]._id?.toString() || "",
       "isoDate",
       new Date(expensesWithoutISOdate[i].date || new Date()).toISOString()
     );
