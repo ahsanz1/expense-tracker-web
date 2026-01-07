@@ -140,3 +140,21 @@ export async function updateExpenseAction(
   revalidatePath(`/expenses/${expenseDate}`);
   redirect(`/expenses/${expenseDate}`);
 }
+
+// Helper function for updating a single field in an expense (used by scripts)
+export async function updateExpenseField(
+  id: string,
+  field: string,
+  value: string | number
+) {
+  const updateResult = await withDatabaseOperation(async function (
+    client: MongoClient
+  ) {
+    const db = client.db("expense-tracker-db");
+    const updateResult = await db
+      .collection("Expense")
+      .updateOne({ _id: new ObjectId(id) }, { $set: { [field]: value } });
+    return updateResult;
+  });
+  return updateResult;
+}
