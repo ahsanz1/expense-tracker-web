@@ -67,16 +67,31 @@ export const fetchAllExpenses = async () => {
   return serializeMongoData(expenses);
 };
 
-export const fetchExpensesForMonth = async (month: string) => {
+const SHORT_MONTH_TO_NUM: Record<string, number> = {
+  Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+  Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12,
+};
+
+export const fetchExpensesForMonth = async (month: string, year: number | string) => {
+  const yearNum = typeof year === "string" ? parseInt(year, 10) : year;
+  const monthNum = SHORT_MONTH_TO_NUM[month];
+  if (monthNum == null) {
+    return [];
+  }
+  const start = new Date(Date.UTC(yearNum, monthNum - 1, 1, 0, 0, 0, 0));
+  const end = new Date(Date.UTC(yearNum, monthNum, 0, 23, 59, 59, 999));
+  const startISO = start.toISOString();
+  const endISO = end.toISOString();
+
   const expenses = await withDatabaseOperation(async function (
     client: MongoClient
   ) {
     const db = client.db("expense-tracker-db");
     const expenses = await (
       await db.collection("Expense").find({
-        date: {
-          $regex: month,
-          $options: "i",
+        isoDate: {
+          $gte: startISO,
+          $lte: endISO,
         },
       })
     ).toArray();

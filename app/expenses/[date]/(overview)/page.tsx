@@ -9,10 +9,12 @@ import React from "react";
 
 async function Page({ params }: { params: { date: string } }) {
   const date = params.date;
-  const month = new Date(date).toLocaleString("default", { month: "short" });
+  const dateObj = new Date(date);
+  const month = dateObj.toLocaleString("default", { month: "short" });
+  const year = dateObj.getFullYear();
   const expensesPromise = await Promise.all([
     fetchExpenses(date),
-    fetchExpensesForMonth(month),
+    fetchExpensesForMonth(month, year),
   ]);
   const [expenses, expensesForMonth] = expensesPromise;
   const monthTotal = expensesForMonth.reduce(

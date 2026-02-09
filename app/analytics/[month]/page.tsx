@@ -11,7 +11,7 @@ async function Page({ params }: { params: { month: string } }) {
   const [month, year] = params.month.split("-");
   const today = new Date();
   const thisDay = today.getDate();
-  const monthExpenses = (await fetchExpensesForMonth(month)) || [];
+  const monthExpenses = (await fetchExpensesForMonth(month, year)) || [];
 
   const { chartOptions, chartData } = getChartData({
     month,
