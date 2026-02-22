@@ -1,6 +1,7 @@
 "use client";
 
 import { updateExpenseAction } from "@/app/lib/actions";
+import { DEFAULT_EXPENSE_SOURCE, EXPENSE_SOURCES } from "@/app/lib/static";
 import { sortByKeyName } from "@/app/lib/utils";
 import CategorySearchInput from "@/app/ui/category-search-input";
 import Link from "next/link";
@@ -25,6 +26,7 @@ function EditExpenseForm({
     title: expense.title?.toString() || "",
     amount: expense.amount?.toString() || "",
     category: expense.category || "",
+    source: (expense as { source?: string }).source || DEFAULT_EXPENSE_SOURCE,
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,6 +50,7 @@ function EditExpenseForm({
       formDataToSubmit.append("title", formData.title.trim());
       formDataToSubmit.append("amount", formData.amount);
       formDataToSubmit.append("category", formData.category);
+      formDataToSubmit.append("source", formData.source);
 
       await updateExpenseAction(
         expense._id?.toString() || "",
@@ -70,7 +73,7 @@ function EditExpenseForm({
       
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-y-6 border border-gray-200 rounded-lg p-6 bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor="title"
@@ -122,6 +125,27 @@ function EditExpenseForm({
                 onChange={(value) => handleChange("category", value)}
                 required
               />
+            </div>
+
+            <div>
+              <label
+                htmlFor="source"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Source
+              </label>
+              <select
+                id="source"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                value={formData.source}
+                onChange={(e) => handleChange("source", e.target.value)}
+              >
+                {EXPENSE_SOURCES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

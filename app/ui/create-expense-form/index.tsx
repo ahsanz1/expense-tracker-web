@@ -1,6 +1,7 @@
 "use client";
 
 import { createMultipleExpensesAction } from "@/app/lib/actions";
+import { DEFAULT_EXPENSE_SOURCE, EXPENSE_SOURCES } from "@/app/lib/static";
 import { sortByKeyName } from "@/app/lib/utils";
 import CategorySearchInput from "@/app/ui/category-search-input";
 import Link from "next/link";
@@ -11,6 +12,7 @@ interface ExpenseEntry {
   title: string;
   amount: string;
   category: string;
+  source: string;
 }
 
 function CreateExpenseForm({
@@ -23,12 +25,12 @@ function CreateExpenseForm({
   const date = new Date(expensesDate).toDateString();
   const sortedExpenseCategories = sortByKeyName(expenseCategories, "name");
   const [expenses, setExpenses] = useState<ExpenseEntry[]>([
-    { title: "", amount: "", category: "" },
+    { title: "", amount: "", category: "", source: DEFAULT_EXPENSE_SOURCE },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addExpenseRow = () => {
-    setExpenses([...expenses, { title: "", amount: "", category: "" }]);
+    setExpenses([...expenses, { title: "", amount: "", category: "", source: DEFAULT_EXPENSE_SOURCE }]);
   };
 
   const removeExpenseRow = (index: number) => {
@@ -54,6 +56,7 @@ function CreateExpenseForm({
         title: exp.title.trim(),
         amount: Number(exp.amount),
         category: exp.category,
+        source: exp.source || DEFAULT_EXPENSE_SOURCE,
       }));
 
     if (validExpenses.length === 0) {
@@ -101,7 +104,7 @@ function CreateExpenseForm({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <label
                     htmlFor={`title-${index}`}
@@ -159,6 +162,29 @@ function CreateExpenseForm({
                     }
                     required
                   />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor={`source-${index}`}
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Source
+                  </label>
+                  <select
+                    id={`source-${index}`}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                    value={expense.source || DEFAULT_EXPENSE_SOURCE}
+                    onChange={(e) =>
+                      updateExpense(index, "source", e.target.value)
+                    }
+                  >
+                    {EXPENSE_SOURCES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>

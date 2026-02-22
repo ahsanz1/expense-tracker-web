@@ -1,4 +1,5 @@
 "use client";
+import { logoutAction } from "@/app/lib/actions";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import IconButton from "../icon-button";
@@ -32,7 +33,7 @@ function NavLinks() {
         <MenuBars />
       </IconButton>
       {open && (
-        <div className="flex flex-col items-start gap-y-0 w-screen absolute top-12 left-0 z-10 bg-white border-b border-gray-200 shadow-lg">
+        <div className="flex flex-col items-start gap-y-0 w-screen absolute top-full left-0 z-10 bg-white border-b border-gray-200 shadow-lg mt-0">
           <Link 
             href={"/categories"} 
             className="border-b border-gray-200 p-4 w-full text-black hover:bg-gray-50 transition-colors"
@@ -45,12 +46,13 @@ function NavLinks() {
           >
             Analytics
           </Link>
-          <Link 
-            href={"/Login"} 
-            className="p-4 w-full text-black hover:bg-gray-50 transition-colors"
+          <button
+            type="button"
+            onClick={() => logoutAction()}
+            className="p-4 w-full text-left text-black hover:bg-gray-50 transition-colors"
           >
-            Login
-          </Link>
+            Logout
+          </button>
         </div>
       )}
       <div className="hidden md:flex flex-row justify-between gap-x-4">
@@ -66,12 +68,13 @@ function NavLinks() {
         >
           Categories
         </Link>
-        <Link 
-          href={"/Login"} 
+        <button
+          type="button"
+          onClick={() => logoutAction()}
           className="px-4 py-2 text-black hover:text-gray-600 transition-colors font-medium"
         >
-          Login
-        </Link>
+          Logout
+        </button>
       </div>
     </>
   );

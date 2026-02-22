@@ -7,7 +7,11 @@ type ValuePiece = Date | null;
 
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
-function ExpenseTrackerCalendar() {
+function ExpenseTrackerCalendar({
+  onDateSelect,
+}: {
+  onDateSelect?: () => void;
+} = {}) {
   const [value, setValue] = useState<Value>(new Date());
 
   const router = useRouter();
@@ -27,7 +31,8 @@ function ExpenseTrackerCalendar() {
     const day = String(selectedDate.getDate()).padStart(2, '0');
     const dateString = `${year}-${month}-${day}`;
     
-    // Navigate to the expenses page
+    // Notify parent (e.g. close modal) then navigate
+    onDateSelect?.();
     router.push(`/expenses/${dateString}`);
   };
 

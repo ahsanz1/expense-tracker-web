@@ -5,6 +5,7 @@ export type Expense = {
   title: String;
   amount: Number;
   category: string;
+  source?: string;
   date?: string;
   isoDate?: string
 };

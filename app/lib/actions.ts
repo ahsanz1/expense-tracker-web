@@ -2,15 +2,50 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { z } from "zod";
 import { withDatabaseOperation } from "./mongo";
 import { MongoClient, ObjectId } from "mongodb";
-import { dbCategories } from "./static";
+import { dbCategories, DEFAULT_EXPENSE_SOURCE } from "./static";
+
+const SESSION_COOKIE = "expense_tracker_session";
+
+export async function loginAction(credentials: { email: string; password: string }) {
+  const email = (credentials.email ?? "").trim();
+  const password = credentials.password ?? "";
+  const expectedEmail = process.env.AUTH_EMAIL ?? "";
+  const expectedPassword = process.env.AUTH_PASSWORD ?? "";
+  const secret = process.env.AUTH_SECRET ?? "";
+
+  if (!secret || expectedEmail === "" || expectedPassword === "") {
+    return { error: "Auth not configured" };
+  }
+  if (email !== expectedEmail || password !== expectedPassword) {
+    return { error: "Invalid email or password" };
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, secret, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+    path: "/",
+  });
+  return { success: true };
+}
+
+export async function logoutAction() {
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
+  redirect("/login");
+}
 
 const FormSchema = z.object({
   title: z.string(),
   amount: z.coerce.number(),
   category: z.string(),
+  source: z.string().optional().default(DEFAULT_EXPENSE_SOURCE),
 });
 
 const CategoryFormSchema = z.object({
@@ -23,18 +58,20 @@ export async function createExpenseAction(
   expenseDate: string,
   formData: FormData
 ) {
-  const { title, amount, category } = FormSchema.parse({
+  const { title, amount, category, source } = FormSchema.parse({
     title: formData.get("title"),
     amount: formData.get("amount"),
     category: formData.get("category"),
+    source: formData.get("source") || undefined,
   });
   const date = new Date(expenseDate).toDateString();
   const isoDate = new Date(expenseDate).toISOString();
+  const expenseSource = source || DEFAULT_EXPENSE_SOURCE;
   await withDatabaseOperation(async function (client: MongoClient) {
     const db = client.db("expense-tracker-db");
     const createExpenseRes = await db
       .collection("Expense")
-      .insertOne({ title, amount, category, date, isoDate });
+      .insertOne({ title, amount, category, source: expenseSource, date, isoDate });
     console.log(createExpenseRes);
   });
 
@@ -44,7 +81,7 @@ export async function createExpenseAction(
 
 export async function createMultipleExpensesAction(
   expenseDate: string,
-  expenses: Array<{ title: string; amount: number; category: string }>
+  expenses: Array<{ title: string; amount: number; category: string; source?: string }>
 ) {
   const validatedExpenses = MultipleExpensesSchema.parse(expenses);
   const date = new Date(expenseDate).toDateString();
@@ -54,6 +91,7 @@ export async function createMultipleExpensesAction(
     title: expense.title,
     amount: expense.amount,
     category: expense.category,
+    source: expense.source || DEFAULT_EXPENSE_SOURCE,
     date,
     isoDate,
   }));
@@ -117,14 +155,16 @@ export async function updateExpenseAction(
   expenseDate: string,
   formData: FormData
 ) {
-  const { title, amount, category } = FormSchema.parse({
+  const { title, amount, category, source } = FormSchema.parse({
     title: formData.get("title"),
     amount: formData.get("amount"),
     category: formData.get("category"),
+    source: formData.get("source") || undefined,
   });
   
   const date = new Date(expenseDate).toDateString();
   const isoDate = new Date(expenseDate).toISOString();
+  const expenseSource = source || DEFAULT_EXPENSE_SOURCE;
   
   await withDatabaseOperation(async function (client: MongoClient) {
     const db = client.db("expense-tracker-db");
@@ -132,7 +172,7 @@ export async function updateExpenseAction(
       .collection("Expense")
       .updateOne(
         { _id: new ObjectId(expenseId) },
-        { $set: { title, amount, category, date, isoDate } }
+        { $set: { title, amount, category, source: expenseSource, date, isoDate } }
       );
     console.log(updateResult);
   });

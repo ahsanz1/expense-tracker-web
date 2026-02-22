@@ -10,7 +10,7 @@ function MobileNav({
 }>) {
   return (
     <div className={className}>
-      <div className="flex flex-row justify-between gap-x-2 items-center">
+      <div className="relative flex flex-row justify-between gap-x-2 items-center">
         <Link href="/" className="flex items-center">
           <h3 className="text-xl font-semibold text-black">
             Expense Tracker

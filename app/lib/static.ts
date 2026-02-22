@@ -1,3 +1,15 @@
+export const DEFAULT_EXPENSE_SOURCE = "Salary";
+
+export const EXPENSE_SOURCES = [
+  "Salary",
+  "AIAIF Savings",
+  "MeezanBank Savings",
+  "MashreqBank Savings",
+  "Wife/Child Gift Money",
+] as const;
+
+export const SALARY_MONTHLY_AMOUNT = 490_000;
+
 export const dbCategories = [
   {
     name: "To Dad",
