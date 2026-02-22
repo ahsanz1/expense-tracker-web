@@ -10,14 +10,16 @@ function MobileNav({
 }>) {
   return (
     <div className={className}>
-      <div className="relative flex flex-row justify-between gap-x-2 items-center">
-        <Link href="/" className="flex items-center">
-          <h3 className="text-xl font-semibold text-black">
+      <div className="grid grid-cols-[auto_minmax(140px,1fr)_auto] items-center gap-x-2 w-full">
+        <NavLinks />
+        <Link href="/" className="min-w-0 flex justify-center overflow-hidden">
+          <h3 className="text-base sm:text-xl font-semibold text-black truncate" title="Expense Tracker">
             Expense Tracker
           </h3>
         </Link>
-        <SearchInput />
-        <NavLinks />
+        <div className="min-w-0 overflow-hidden">
+          <SearchInput />
+        </div>
       </div>
     </div>
   );
