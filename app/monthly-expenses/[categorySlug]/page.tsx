@@ -1,3 +1,4 @@
+import { PencilSquareIcon } from "@heroicons/react/16/solid";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
@@ -58,6 +59,15 @@ export default async function MonthlyCategoryExpensesPage({
     });
   }
 
+  function toExpenseDateParam(isoOrDate: string | undefined): string {
+    if (!isoOrDate) return "";
+    const d = new Date(isoOrDate);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-6">
@@ -78,22 +88,37 @@ export default async function MonthlyCategoryExpensesPage({
       ) : (
         <>
           <ul className="divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden bg-white">
-            {filtered.map((expense) => (
-              <li
-                key={String(expense._id)}
-                className="flex flex-row justify-between items-center px-4 py-3"
-              >
-                <div>
-                  <p className="font-medium text-black">{expense.title ?? "—"}</p>
-                  <p className="text-sm text-gray-500">
-                    {formatDate(expense.isoDate ?? expense.date)}
+            {filtered.map((expense) => {
+              const expenseDate = toExpenseDateParam(expense.isoDate ?? expense.date);
+              const editHref = expense._id && expenseDate
+                ? `/expenses/${expenseDate}/${expense._id}/edit`
+                : null;
+              return (
+                <li
+                  key={String(expense._id)}
+                  className="flex flex-row justify-between items-center gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-black">{expense.title ?? "—"}</p>
+                    <p className="text-sm text-gray-500">
+                      {formatDate(expense.isoDate ?? expense.date)}
+                    </p>
+                  </div>
+                  <p className="font-semibold text-black shrink-0">
+                    PKR {Number(expense.amount).toLocaleString()}
                   </p>
-                </div>
-                <p className="font-semibold text-black">
-                  PKR {Number(expense.amount).toLocaleString()}
-                </p>
-              </li>
-            ))}
+                  {editHref && (
+                    <Link
+                      href={editHref}
+                      className="shrink-0 p-1 text-black hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 rounded"
+                      aria-label="Edit expense"
+                    >
+                      <PencilSquareIcon className="h-5 w-5" />
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
           </ul>
           <div className="mt-4 flex justify-end border-t border-gray-200 pt-4">
             <p className="text-lg font-semibold text-black">

@@ -6,6 +6,7 @@ export const EXPENSE_SOURCES = [
   "MeezanBank Savings",
   "MashreqBank Savings",
   "Wife/Child Gift Money",
+  "Sale Proceeds",
 ] as const;
 
 export const SALARY_MONTHLY_AMOUNT = 490_000;

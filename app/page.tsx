@@ -1,5 +1,5 @@
 import { fetchExpensesForMonth } from "./lib/data";
-import { SALARY_MONTHLY_AMOUNT } from "./lib/static";
+import { EXPENSE_SOURCES, SALARY_MONTHLY_AMOUNT } from "./lib/static";
 import { slugify, amountToColor } from "./lib/utils";
 import HomeCategoryGrid from "./ui/home-category-grid";
 
@@ -7,24 +7,48 @@ function formatPkr(n: number): string {
   return n.toLocaleString("en-PK", { maximumFractionDigits: 0 });
 }
 
-export default async function Home() {
+function getSourceFromParams(sourceParam: string | string[] | undefined): string {
+  const raw = typeof sourceParam === "string" ? sourceParam : sourceParam?.[0];
+  if (!raw) return "Salary";
+  const decoded = decodeURIComponent(raw);
+  return EXPENSE_SOURCES.includes(decoded as any) ? decoded : "Salary";
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ source?: string }> | { source?: string };
+}) {
+  const params = (await Promise.resolve(searchParams).catch(() => ({}))) as { source?: string };
+  const selectedSource = getSourceFromParams(params.source);
+
   const now = new Date();
   const month = now.toLocaleString("default", { month: "short" });
   const year = now.getFullYear();
   const monthLabel = `${month} ${year}`;
 
-  const expenses = await fetchExpensesForMonth(month, year) as { category?: string; amount: number; source?: string }[];
-  const byCategory = new Map<string, number>();
+  const allExpenses = (await fetchExpensesForMonth(month, year)) as {
+    category?: string;
+    amount: number;
+    source?: string;
+  }[];
+  const expensesForSource = allExpenses.filter(
+    (e) => (e.source ?? "Salary") === selectedSource
+  );
 
-  let salarySpentThisMonth = 0;
-  for (const e of expenses) {
-    if ((e.source ?? "Salary") === "Salary") {
-      salarySpentThisMonth += Number(e.amount);
-    }
+  const byCategory = new Map<string, number>();
+  for (const e of expensesForSource) {
     const cat = e.category ?? "Uncategorized";
     byCategory.set(cat, (byCategory.get(cat) ?? 0) + Number(e.amount));
   }
-  const salaryRemaining = Math.max(0, SALARY_MONTHLY_AMOUNT - salarySpentThisMonth);
+
+  let salaryRemaining = 0;
+  if (selectedSource === "Salary") {
+    const salarySpent = allExpenses
+      .filter((e) => (e.source ?? "Salary") === "Salary")
+      .reduce((acc, e) => acc + Number(e.amount), 0);
+    salaryRemaining = Math.max(0, SALARY_MONTHLY_AMOUNT - salarySpent);
+  }
 
   const sorted = Array.from(byCategory.entries())
     .map(([category, total]) => ({ category, total }))
@@ -46,8 +70,11 @@ export default async function Home() {
       <HomeCategoryGrid
         items={items}
         monthLabel={monthLabel}
+        currentSource={selectedSource}
+        sources={[...EXPENSE_SOURCES]}
         salaryRemaining={salaryRemaining}
         salaryFormatted={formatPkr(salaryRemaining)}
+        showSalaryRemaining={selectedSource === "Salary"}
       />
     </main>
   );
