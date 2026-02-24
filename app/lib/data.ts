@@ -149,6 +149,69 @@ export const searchExpenses = async (searchTerm: string) => {
   return serializeMongoData(expenses);
 };
 
+export type SearchExpensesFilters = {
+  query: string;
+  startDate?: string;
+  endDate?: string;
+  category?: string;
+  source?: string;
+  page?: number;
+  limit?: number;
+};
+
+export const searchExpensesFiltered = async (
+  filters: SearchExpensesFilters
+): Promise<{ expenses: unknown[]; totalCount: number }> => {
+  const { query, startDate, endDate, category, source, page = 1, limit = 10 } = filters;
+  const q = (query ?? "").trim();
+  if (!q) return { expenses: [], totalCount: 0 };
+
+  const skip = (Math.max(1, page) - 1) * limit;
+  const match: Record<string, unknown> = {
+    title: { $regex: q, $options: "i" },
+  };
+
+  if (startDate || endDate) {
+    match.isoDate = {};
+    if (startDate) {
+      (match.isoDate as Record<string, string>).$gte = new Date(startDate).toISOString();
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setUTCHours(23, 59, 59, 999);
+      (match.isoDate as Record<string, string>).$lte = end.toISOString();
+    }
+  }
+  if (category && category.trim()) {
+    match.category = category.trim();
+  }
+  if (source && source.trim()) {
+    if (source.trim() === "Salary") {
+      match.$or = [
+        { source: "Salary" },
+        { source: { $exists: false } },
+        { source: null },
+      ];
+    } else {
+      match.source = source.trim();
+    }
+  }
+
+  const result = await withDatabaseOperation(async function (client: MongoClient) {
+    const db = client.db("expense-tracker-db");
+    const coll = db.collection("Expense");
+    const [expenses, totalCount] = await Promise.all([
+      coll.find(match).sort({ isoDate: -1 }).skip(skip).limit(limit).toArray(),
+      coll.countDocuments(match),
+    ]);
+    return { expenses, totalCount };
+  });
+  return {
+    expenses: serializeMongoData(result.expenses),
+    totalCount: result.totalCount,
+  };
+};
+
 export const fetchExpenseById = async (id: string) => {
   const expense = await withDatabaseOperation(async function (
     client: MongoClient

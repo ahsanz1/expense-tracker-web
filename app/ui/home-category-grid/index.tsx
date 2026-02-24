@@ -1,9 +1,11 @@
 "use client";
 
+import { CalendarDaysIcon } from "@heroicons/react/16/solid";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import CalendarModal from "../calendar-modal";
+import { HomeCategoryGridSkeleton } from "../skeletons";
 import "react-calendar/dist/Calendar.css";
 
 export type CategoryTotal = {
@@ -16,6 +18,8 @@ export type CategoryTotal = {
 export default function HomeCategoryGrid({
   items,
   monthLabel,
+  monthKey,
+  monthOptions,
   currentSource,
   sources,
   salaryRemaining,
@@ -24,6 +28,8 @@ export default function HomeCategoryGrid({
 }: {
   items: CategoryTotal[];
   monthLabel: string;
+  monthKey: string;
+  monthOptions: { key: string; label: string }[];
   currentSource: string;
   sources: readonly string[];
   salaryRemaining: number;
@@ -31,20 +37,38 @@ export default function HomeCategoryGrid({
   showSalaryRemaining: boolean;
 }) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleSourceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const updateParams = (updates: { source?: string; month?: string }) => {
     const next = new URLSearchParams(searchParams.toString());
-    if (value === "Salary") {
-      next.delete("source");
-    } else {
-      next.set("source", value);
+    if (updates.source !== undefined) {
+      if (updates.source === "Salary") next.delete("source");
+      else next.set("source", updates.source);
+    }
+    if (updates.month !== undefined) {
+      if (updates.month) next.set("month", updates.month);
+      else next.delete("month");
     }
     const query = next.toString();
-    router.replace(query ? `/?${query}` : "/");
+    startTransition(() => {
+      router.replace(query ? `/?${query}` : "/");
+    });
   };
+
+  const handleSourceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    updateParams({ source: value });
+  };
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateParams({ month: e.target.value });
+  };
+
+  if (isPending) {
+    return <HomeCategoryGridSkeleton />;
+  }
 
   return (
     <>
@@ -55,27 +79,43 @@ export default function HomeCategoryGrid({
           </h1>
           <p className="text-gray-600">{monthLabel}</p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
           <select
-            id="home-source"
-            value={currentSource}
-            onChange={handleSourceChange}
-            className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-black focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent shadow-sm min-w-[10rem]"
-            aria-label="Filter by expense source"
+            id="home-month"
+            value={monthKey}
+            onChange={handleMonthChange}
+            className="select-spaced sm:order-none order-last rounded-lg border border-gray-200 bg-white pl-4 pr-10 py-2.5 text-sm font-medium text-black focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent shadow-sm min-w-0 w-full sm:w-auto"
+            aria-label="Select month"
           >
-            {sources.map((s) => (
-              <option key={s} value={s}>
-                {s}
+            {monthOptions.map((o) => (
+              <option key={o.key} value={o.key}>
+                {o.label}
               </option>
             ))}
           </select>
-          <button
-            type="button"
-            onClick={() => setCalendarOpen(true)}
-            className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-black hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 transition-colors shadow-sm"
-          >
-            Pick a date
-          </button>
+          <div className="flex flex-row items-center justify-between gap-2">
+            <select
+              id="home-source"
+              value={currentSource}
+              onChange={handleSourceChange}
+              className="select-spaced flex-1 min-w-0 rounded-lg border border-gray-200 bg-white pl-4 pr-10 py-2.5 text-sm font-medium text-black focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent shadow-sm"
+              aria-label="Filter by expense source"
+            >
+              {sources.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setCalendarOpen(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-black text-white px-4 py-2.5 text-sm font-medium hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 transition-colors shrink-0"
+            >
+              <CalendarDaysIcon className="h-5 w-5 shrink-0" />
+              Pick a date
+            </button>
+          </div>
         </div>
       </div>
 
@@ -95,7 +135,7 @@ export default function HomeCategoryGrid({
           {items.map(({ category, total, slug, color }) => (
             <Link
               key={slug}
-              href={`/monthly-expenses/${slug}`}
+              href={`/monthly-expenses/${slug}?month=${encodeURIComponent(monthKey)}`}
               className="block rounded-lg border border-gray-200 p-4 transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
               style={{
                 backgroundColor: color,

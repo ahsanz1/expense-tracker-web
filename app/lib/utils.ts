@@ -1,5 +1,39 @@
 import { Expense } from "./types";
 
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** Month key "YYYY-MM" to { month: "Jan", year: number } */
+export function getMonthYearFromKey(key: string): { month: string; year: number } | null {
+  const match = /^(\d{4})-(\d{1,2})$/.exec(key.trim());
+  if (!match) return null;
+  const year = parseInt(match[1], 10);
+  const monthNum = parseInt(match[2], 10);
+  if (monthNum < 1 || monthNum > 12) return null;
+  return { month: MONTH_NAMES[monthNum - 1], year };
+}
+
+/** Current month key "YYYY-MM" */
+export function getCurrentMonthKey(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1;
+  return `${y}-${String(m).padStart(2, "0")}`;
+}
+
+/** Last N months as keys for dropdown (current first) */
+export function getMonthOptions(count: number): { key: string; label: string }[] {
+  const out: { key: string; label: string }[] = [];
+  const d = new Date();
+  for (let i = 0; i < count; i++) {
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    const key = `${y}-${String(m).padStart(2, "0")}`;
+    out.push({ key, label: `${MONTH_NAMES[m - 1]} ${y}` });
+    d.setMonth(d.getMonth() - 1);
+  }
+  return out;
+}
+
 /** Converts a string to a URL-safe slug (e.g. "Food & Drinks" → "food-drinks"). */
 export function slugify(text: string): string {
   return text

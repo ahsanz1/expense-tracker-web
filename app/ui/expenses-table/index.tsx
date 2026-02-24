@@ -94,7 +94,7 @@ function ExpensesTable({
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                       <div className="flex flex-row justify-center gap-x-3">
                         <Link
-                          href={`/expenses/${expensesDate}/${expense._id}/edit`}
+                          href={`/expenses/${expensesDate}/${expense._id}/edit?returnTo=${encodeURIComponent(`/expenses/${expensesDate}`)}`}
                           className="text-gray-600 hover:text-black transition-colors"
                           title="Edit"
                         >

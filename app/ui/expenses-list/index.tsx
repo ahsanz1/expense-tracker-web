@@ -111,7 +111,7 @@ function ExpensesList({
                       </p>
                       <div className="flex flex-row gap-x-2 mr-2">
                         <Link
-                          href={`/expenses/${expensesDate}/${expense._id}/edit`}
+                          href={`/expenses/${expensesDate}/${expense._id}/edit?returnTo=${encodeURIComponent(`/expenses/${expensesDate}`)}`}
                           onClick={(e) => e.stopPropagation()}
                           className="text-gray-600 hover:text-black transition-colors"
                         >

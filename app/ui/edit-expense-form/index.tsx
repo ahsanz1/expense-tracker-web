@@ -12,12 +12,14 @@ interface EditExpenseFormProps {
   expense: Expense;
   expensesDate: string;
   expenseCategories: any[];
+  returnTo?: string;
 }
 
 function EditExpenseForm({
   expense,
   expensesDate,
   expenseCategories = [],
+  returnTo,
 }: EditExpenseFormProps) {
   const date = new Date(expensesDate).toDateString();
   const sortedExpenseCategories = sortByKeyName(expenseCategories, "name");
@@ -51,6 +53,7 @@ function EditExpenseForm({
       formDataToSubmit.append("amount", formData.amount);
       formDataToSubmit.append("category", formData.category);
       formDataToSubmit.append("source", formData.source);
+      if (returnTo) formDataToSubmit.append("returnTo", returnTo);
 
       await updateExpenseAction(
         expense._id?.toString() || "",
@@ -136,7 +139,7 @@ function EditExpenseForm({
               </label>
               <select
                 id="source"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                className="select-spaced w-full pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
                 value={formData.source}
                 onChange={(e) => handleChange("source", e.target.value)}
               >
@@ -151,7 +154,7 @@ function EditExpenseForm({
 
           <div className="flex flex-row justify-end gap-x-3 pt-4 border-t border-gray-200">
             <Link
-              href={`/expenses/${expensesDate}`}
+              href={returnTo || `/expenses/${expensesDate}`}
               className="px-6 py-2 bg-white border border-gray-300 text-black rounded-md hover:bg-gray-50 transition-colors font-medium"
             >
               Cancel

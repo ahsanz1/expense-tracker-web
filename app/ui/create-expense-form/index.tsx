@@ -173,7 +173,7 @@ function CreateExpenseForm({
                   </label>
                   <select
                     id={`source-${index}`}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                    className="select-spaced w-full pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
                     value={expense.source || DEFAULT_EXPENSE_SOURCE}
                     onChange={(e) =>
                       updateExpense(index, "source", e.target.value)

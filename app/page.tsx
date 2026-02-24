@@ -1,6 +1,6 @@
 import { fetchExpensesForMonth } from "./lib/data";
 import { EXPENSE_SOURCES, SALARY_MONTHLY_AMOUNT } from "./lib/static";
-import { slugify, amountToColor } from "./lib/utils";
+import { slugify, amountToColor, getMonthYearFromKey, getCurrentMonthKey, getMonthOptions } from "./lib/utils";
 import HomeCategoryGrid from "./ui/home-category-grid";
 import { Suspense } from "react";
 
@@ -15,17 +15,24 @@ function getSourceFromParams(sourceParam: string | string[] | undefined): string
   return EXPENSE_SOURCES.includes(decoded as any) ? decoded : "Salary";
 }
 
+function getMonthKeyFromParams(monthParam: string | string[] | undefined): string {
+  const raw = typeof monthParam === "string" ? monthParam : monthParam?.[0];
+  if (!raw) return getCurrentMonthKey();
+  const key = raw.trim();
+  return getMonthYearFromKey(key) ? key : getCurrentMonthKey();
+}
+
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ source?: string }> | { source?: string };
+  searchParams: Promise<{ source?: string; month?: string }> | { source?: string; month?: string };
 }) {
-  const params = (await Promise.resolve(searchParams).catch(() => ({}))) as { source?: string };
+  const params = (await Promise.resolve(searchParams).catch(() => ({}))) as { source?: string; month?: string };
   const selectedSource = getSourceFromParams(params.source);
-
-  const now = new Date();
-  const month = now.toLocaleString("default", { month: "short" });
-  const year = now.getFullYear();
+  const monthKey = getMonthKeyFromParams(params.month);
+  const monthYear = getMonthYearFromKey(monthKey);
+  const month = monthYear?.month ?? new Date().toLocaleString("default", { month: "short" });
+  const year = monthYear?.year ?? new Date().getFullYear();
   const monthLabel = `${month} ${year}`;
 
   const allExpenses = (await fetchExpensesForMonth(month, year)) as {
@@ -80,6 +87,8 @@ export default async function Home({
         <HomeCategoryGrid
           items={items}
           monthLabel={monthLabel}
+          monthKey={monthKey}
+          monthOptions={getMonthOptions(24)}
           currentSource={selectedSource}
           sources={[...EXPENSE_SOURCES]}
           salaryRemaining={salaryRemaining}

@@ -24,7 +24,7 @@ const SearchInput = () => {
       e.preventDefault();
     if (!searchTerm) return;
     router.push(
-      `/search?query=${searchTerm}`
+      `/search?query=${encodeURIComponent(searchTerm.trim())}`
     );
   };
 

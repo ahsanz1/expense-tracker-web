@@ -150,6 +150,12 @@ export const deleteExpenseAction = async (id: string, expenseDate: string) => {
   return deleteResult;
 };
 
+function isSafeReturnTo(returnTo: string | null | undefined): boolean {
+  if (!returnTo || typeof returnTo !== "string") return false;
+  const trimmed = returnTo.trim();
+  return trimmed.startsWith("/") && !trimmed.startsWith("//");
+}
+
 export async function updateExpenseAction(
   expenseId: string,
   expenseDate: string,
@@ -161,11 +167,14 @@ export async function updateExpenseAction(
     category: formData.get("category"),
     source: formData.get("source") || undefined,
   });
-  
+  const returnToRaw = formData.get("returnTo")?.toString();
+  const safeReturn =
+    returnToRaw != null && isSafeReturnTo(returnToRaw) ? returnToRaw.trim() : null;
+
   const date = new Date(expenseDate).toDateString();
   const isoDate = new Date(expenseDate).toISOString();
   const expenseSource = source || DEFAULT_EXPENSE_SOURCE;
-  
+
   await withDatabaseOperation(async function (client: MongoClient) {
     const db = client.db("expense-tracker-db");
     const updateResult = await db
@@ -178,7 +187,8 @@ export async function updateExpenseAction(
   });
 
   revalidatePath(`/expenses/${expenseDate}`);
-  redirect(`/expenses/${expenseDate}`);
+  if (safeReturn) revalidatePath(safeReturn);
+  redirect(safeReturn ?? `/expenses/${expenseDate}`);
 }
 
 // Helper function for updating a single field in an expense (used by scripts)

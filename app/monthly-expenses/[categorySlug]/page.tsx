@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
 import { fetchExpensesForMonth } from "@/app/lib/data";
-import { slugify } from "@/app/lib/utils";
+import { slugify, getMonthYearFromKey, getCurrentMonthKey } from "@/app/lib/utils";
 
 type ExpenseRow = {
   _id?: string;
@@ -16,12 +16,18 @@ type ExpenseRow = {
 
 export default async function MonthlyCategoryExpensesPage({
   params,
+  searchParams,
 }: {
   params: { categorySlug: string };
+  searchParams: Promise<{ month?: string }> | { month?: string };
 }) {
-  const now = new Date();
-  const month = now.toLocaleString("default", { month: "short" });
-  const year = now.getFullYear();
+  const resolvedSearchParams = await Promise.resolve(searchParams).catch(() => ({})) as { month?: string };
+  const monthKey = (resolvedSearchParams.month?.trim() && getMonthYearFromKey(resolvedSearchParams.month))
+    ? resolvedSearchParams.month.trim()
+    : getCurrentMonthKey();
+  const monthYear = getMonthYearFromKey(monthKey);
+  const month = monthYear?.month ?? new Date().toLocaleString("default", { month: "short" });
+  const year = monthYear?.year ?? new Date().getFullYear();
   const monthLabel = `${month} ${year}`;
 
   const expenses = (await fetchExpensesForMonth(month, year)) as ExpenseRow[];
@@ -72,7 +78,7 @@ export default async function MonthlyCategoryExpensesPage({
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-6">
         <Link
-          href="/"
+          href={monthKey !== getCurrentMonthKey() ? `/?month=${encodeURIComponent(monthKey)}` : "/"}
           className="text-sm font-medium text-gray-600 hover:text-black"
         >
           ← Back to home
@@ -90,8 +96,12 @@ export default async function MonthlyCategoryExpensesPage({
           <ul className="divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden bg-white">
             {filtered.map((expense) => {
               const expenseDate = toExpenseDateParam(expense.isoDate ?? expense.date);
+              const returnPath =
+                monthKey !== getCurrentMonthKey()
+                  ? `/monthly-expenses/${params.categorySlug}?month=${monthKey}`
+                  : `/monthly-expenses/${params.categorySlug}`;
               const editHref = expense._id && expenseDate
-                ? `/expenses/${expenseDate}/${expense._id}/edit`
+                ? `/expenses/${expenseDate}/${expense._id}/edit?returnTo=${encodeURIComponent(returnPath)}`
                 : null;
               return (
                 <li
