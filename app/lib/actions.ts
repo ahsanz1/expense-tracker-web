@@ -10,27 +10,15 @@ import { dbCategories, DEFAULT_EXPENSE_SOURCE } from "./static";
 
 const SESSION_COOKIE = "expense_tracker_session";
 
-export async function loginAction(credentials: { email: string; password: string }) {
+export async function loginAction(credentials: { email: string; password: string; _nonce?: number }) {
   const email = (credentials.email ?? "").trim();
   const password = credentials.password ?? "";
   const expectedEmail = process.env.AUTH_EMAIL ?? "";
   const expectedPassword = process.env.AUTH_PASSWORD ?? "";
   const secret = process.env.AUTH_SECRET ?? "";
 
-  const hasSecret = secret.length > 0;
-  const hasEmail = expectedEmail.length > 0;
-  const hasPassword = expectedPassword.length > 0;
-  if (process.env.NODE_ENV === "development") {
-    console.log("[loginAction] env check:", {
-      AUTH_SECRET: hasSecret ? "set" : "unset",
-      AUTH_EMAIL: hasEmail ? "set" : "unset",
-      AUTH_PASSWORD: hasPassword ? "set" : "unset",
-    });
-  }
-
   if (!secret || expectedEmail === "" || expectedPassword === "") {
-    const ref = Date.now();
-    return { error: `Auth not configured (ref: ${ref}). If ref is identical on retry, the response is cached.` };
+    return { error: "Auth not configured" };
   }
   if (email !== expectedEmail || password !== expectedPassword) {
     return { error: "Invalid email or password" };

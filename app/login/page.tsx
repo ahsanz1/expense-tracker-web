@@ -25,7 +25,8 @@ export default function LoginPage() {
     const email = (form.querySelector('[name="email"]') as HTMLInputElement)?.value ?? "";
     const password = (form.querySelector('[name="password"]') as HTMLInputElement)?.value ?? "";
     try {
-      const result = await loginAction({ email, password });
+      // Nonce forces a unique request body so cached "Auth not configured" is not reused
+      const result = await loginAction({ email, password, _nonce: Date.now() });
       if (result?.error) {
         setError(result.error);
         return;
