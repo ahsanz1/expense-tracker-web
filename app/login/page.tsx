@@ -1,11 +1,21 @@
 "use client";
 
 import { loginAction } from "@/app/lib/actions";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Unregister service worker on login page so login always hits the server.
+  // Prevents cached "Auth not configured" in new windows/tabs that had an old SW.
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((r) => r.unregister());
+      });
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
