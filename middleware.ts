@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Auth disabled for now – middleware allows all requests through
+const AUTH_DISABLED = true;
+
 const SESSION_COOKIE = "expense_tracker_session";
 
 export function middleware(request: NextRequest) {
+  if (AUTH_DISABLED) {
+    return NextResponse.next();
+  }
+
   const { pathname } = request.nextUrl;
 
-  // Allow login page and static assets
   if (pathname === "/login") {
     const session = request.cookies.get(SESSION_COOKIE)?.value;
     const secret = process.env.AUTH_SECRET;
