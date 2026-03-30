@@ -55,7 +55,7 @@ export default async function Home({
     const salarySpent = allExpenses
       .filter((e) => (e.source ?? "Salary") === "Salary")
       .reduce((acc, e) => acc + Number(e.amount), 0);
-    salaryRemaining = Math.max(0, SALARY_MONTHLY_AMOUNT - salarySpent);
+    salaryRemaining = SALARY_MONTHLY_AMOUNT - salarySpent;
   }
 
   const sorted = Array.from(byCategory.entries())
