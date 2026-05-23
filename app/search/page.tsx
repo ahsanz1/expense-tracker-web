@@ -1,7 +1,10 @@
 import { fetchCategories, searchExpensesFiltered } from "@/app/lib/data";
-import React from "react";
+import React, { Suspense } from "react";
 import SearchFilters from "../ui/search-filters";
+import { buildSearchParamsKey } from "@/app/lib/search-utils";
+import SearchPageShell from "../ui/search-page-shell";
 import SearchResults from "../ui/search-results";
+import { SearchPageSkeleton } from "../ui/skeletons";
 
 const LIMIT = 10;
 
@@ -22,7 +25,7 @@ export default async function SearchPage({
   const pageRaw = (typeof raw?.page === "string" ? raw.page : (raw?.page as string[])?.[0]) ?? "1";
   const page = Math.max(1, parseInt(pageRaw, 10) || 1);
 
-  const { expenses, totalCount } = query
+  const { expenses, totalCount, totalAmount } = query
     ? await searchExpensesFiltered({
         query,
         startDate: startDate || undefined,
@@ -32,7 +35,16 @@ export default async function SearchPage({
         page,
         limit: LIMIT,
       })
-    : { expenses: [], totalCount: 0 };
+    : { expenses: [], totalCount: 0, totalAmount: 0 };
+
+  const serverKey = buildSearchParamsKey({
+    query,
+    startDate,
+    endDate,
+    category,
+    source,
+    page,
+  });
 
   const categories = await fetchCategories();
   const categoriesList = Array.isArray(categories) ? categories : [];
@@ -51,24 +63,29 @@ export default async function SearchPage({
           <p>Enter a search term in the navbar to search expenses by title.</p>
         </div>
       )}
-      {query && (
-        <SearchFilters
-          categories={categoriesList}
-          initialQuery={query}
-          initialStartDate={startDate}
-          initialEndDate={endDate}
-          initialCategory={category}
-          initialSource={source}
-        />
-      )}
-      <SearchResults
-        hits={(expenses as any[]) || []}
-        query={query}
-        totalCount={totalCount}
-        page={page}
-        limit={LIMIT}
-        paramsRecord={paramsRecord}
-      />
+      <Suspense fallback={<SearchPageSkeleton hasQuery={!!query} />}>
+        <SearchPageShell serverKey={serverKey} hasQuery={!!query}>
+          {query && (
+            <SearchFilters
+              categories={categoriesList}
+              initialQuery={query}
+              initialStartDate={startDate}
+              initialEndDate={endDate}
+              initialCategory={category}
+              initialSource={source}
+            />
+          )}
+          <SearchResults
+            hits={(expenses as any[]) || []}
+            query={query}
+            totalCount={totalCount}
+            totalAmount={totalAmount}
+            page={page}
+            limit={LIMIT}
+            paramsRecord={paramsRecord}
+          />
+        </SearchPageShell>
+      </Suspense>
     </main>
   );
 }

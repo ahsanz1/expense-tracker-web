@@ -67,7 +67,7 @@ export default function HomeCategoryGrid({
   };
 
   if (isPending) {
-    return <HomeCategoryGridSkeleton />;
+    return <HomeCategoryGridSkeleton showSalaryRemaining={showSalaryRemaining} />;
   }
 
   return (

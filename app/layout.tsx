@@ -5,6 +5,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import 'react-toastify/dist/ReactToastify.css';
 import Navigation from "./ui/navigation";
 import InstallPrompt from "./ui/install-prompt";
+import { SearchNavProvider } from "./ui/search-nav-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -51,11 +52,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <Navigation />
-        <div className="min-h-screen bg-white">
-          {children}
-        </div>
-        <InstallPrompt />
+        <SearchNavProvider>
+          <Navigation />
+          <div className="min-h-screen bg-white">{children}</div>
+          <InstallPrompt />
+        </SearchNavProvider>
       </body>
     </html>
   );

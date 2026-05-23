@@ -2,6 +2,7 @@ import { fetchExpensesForMonth } from "./lib/data";
 import { EXPENSE_SOURCES, SALARY_MONTHLY_AMOUNT } from "./lib/static";
 import { slugify, amountToColor, getMonthYearFromKey, getCurrentMonthKey, getMonthOptions } from "./lib/utils";
 import HomeCategoryGrid from "./ui/home-category-grid";
+import { HomeCategoryGridSkeleton } from "./ui/skeletons";
 import { Suspense } from "react";
 
 function formatPkr(n: number): string {
@@ -75,15 +76,7 @@ export default async function Home({
 
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <Suspense
-        fallback={
-          <div className="mb-6">
-            <h1 className="text-3xl font-semibold text-black mb-1">Expenses by category</h1>
-            <p className="text-gray-600 mb-6">{monthLabel}</p>
-            <div className="h-10 w-48 rounded-lg bg-gray-100 animate-pulse" />
-          </div>
-        }
-      >
+      <Suspense fallback={<HomeCategoryGridSkeleton showSalaryRemaining={selectedSource === "Salary"} />}>
         <HomeCategoryGrid
           items={items}
           monthLabel={monthLabel}

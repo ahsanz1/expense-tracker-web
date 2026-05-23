@@ -159,14 +159,11 @@ export type SearchExpensesFilters = {
   limit?: number;
 };
 
-export const searchExpensesFiltered = async (
-  filters: SearchExpensesFilters
-): Promise<{ expenses: unknown[]; totalCount: number }> => {
-  const { query, startDate, endDate, category, source, page = 1, limit = 10 } = filters;
+function buildSearchMatch(filters: SearchExpensesFilters): Record<string, unknown> | null {
+  const { query, startDate, endDate, category, source } = filters;
   const q = (query ?? "").trim();
-  if (!q) return { expenses: [], totalCount: 0 };
+  if (!q) return null;
 
-  const skip = (Math.max(1, page) - 1) * limit;
   const match: Record<string, unknown> = {
     title: { $regex: q, $options: "i" },
   };
@@ -196,19 +193,38 @@ export const searchExpensesFiltered = async (
       match.source = source.trim();
     }
   }
+  return match;
+}
+
+export const searchExpensesFiltered = async (
+  filters: SearchExpensesFilters
+): Promise<{ expenses: unknown[]; totalCount: number; totalAmount: number }> => {
+  const { page = 1, limit = 10 } = filters;
+  const match = buildSearchMatch(filters);
+  if (!match) return { expenses: [], totalCount: 0, totalAmount: 0 };
+
+  const skip = (Math.max(1, page) - 1) * limit;
 
   const result = await withDatabaseOperation(async function (client: MongoClient) {
     const db = client.db("expense-tracker-db");
     const coll = db.collection("Expense");
-    const [expenses, totalCount] = await Promise.all([
+    const [expenses, totalCount, sumRows] = await Promise.all([
       coll.find(match).sort({ isoDate: -1 }).skip(skip).limit(limit).toArray(),
       coll.countDocuments(match),
+      coll
+        .aggregate<{ total: number }>([
+          { $match: match },
+          { $group: { _id: null, total: { $sum: "$amount" } } },
+        ])
+        .toArray(),
     ]);
-    return { expenses, totalCount };
+    const totalAmount = sumRows[0]?.total ?? 0;
+    return { expenses, totalCount, totalAmount };
   });
   return {
     expenses: serializeMongoData(result.expenses),
     totalCount: result.totalCount,
+    totalAmount: Number(result.totalAmount) || 0,
   };
 };
 

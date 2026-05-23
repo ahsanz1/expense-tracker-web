@@ -9,7 +9,7 @@ export const EXPENSE_SOURCES = [
   "Sale Proceeds",
 ] as const;
 
-export const SALARY_MONTHLY_AMOUNT = 490_000;
+export const SALARY_MONTHLY_AMOUNT = 510_000;
 
 export const dbCategories = [
   {

@@ -7,6 +7,7 @@ interface SearchResultsProps {
   hits: Expense[];
   query: string;
   totalCount: number;
+  totalAmount: number;
   page: number;
   limit: number;
   /** Current search params as record (e.g. { query: "x", page: "1" }) for building pagination URLs */
@@ -26,11 +27,11 @@ export default function SearchResults({
   hits = [],
   query = "",
   totalCount,
+  totalAmount,
   page,
   limit,
   paramsRecord,
 }: SearchResultsProps) {
-  const totalAmount = hits.reduce((acc: number, curr: any) => acc + Number(curr.amount), 0);
   const totalPages = Math.ceil(totalCount / limit) || 1;
   const hasPrev = page > 1;
   const hasNext = page < totalPages;
@@ -67,11 +68,14 @@ export default function SearchResults({
       ) : (
         <>
           <div className="border border-gray-200 rounded-lg px-6 py-4 bg-gray-50 mb-6">
-            <div className="flex flex-row justify-between items-center">
-              <h2 className="text-lg font-semibold text-black">
-                Total (this page): PKR {totalAmount.toLocaleString()}
-              </h2>
-            </div>
+            <h2 className="text-lg font-semibold text-black">
+              Total (all results): PKR {totalAmount.toLocaleString()}
+            </h2>
+            {totalPages > 1 && (
+              <p className="text-sm text-gray-600 mt-1">
+                Showing page {page} of {totalPages}
+              </p>
+            )}
           </div>
 
           <div className="border border-gray-200 rounded-lg overflow-hidden">

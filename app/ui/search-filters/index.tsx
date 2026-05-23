@@ -5,6 +5,7 @@ import { Disclosure } from "@headlessui/react";
 import { ChevronDownIcon, FunnelIcon } from "@heroicons/react/16/solid";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useTransition } from "react";
+import { useSearchNav } from "../search-nav-context";
 
 export default function SearchFilters({
   categories,
@@ -22,6 +23,7 @@ export default function SearchFilters({
   initialSource: string;
 }) {
   const router = useRouter();
+  const { beginSearchNavigation } = useSearchNav();
   const [isApplyPending, startApplyTransition] = useTransition();
   const [isClearPending, startClearTransition] = useTransition();
   const [startDate, setStartDate] = useState(initialStartDate);
@@ -37,6 +39,7 @@ export default function SearchFilters({
   }, [initialStartDate, initialEndDate, initialCategory, initialSource]);
 
   const applyFilters = () => {
+    beginSearchNavigation();
     startApplyTransition(() => {
       const params = new URLSearchParams();
       const q = initialQuery.trim();
@@ -47,16 +50,20 @@ export default function SearchFilters({
       if (source) params.set("source", source);
       params.set("page", "1");
       router.push(`/search?${params.toString()}`);
+      router.refresh();
     });
   };
 
   const clearFilters = () => {
+    beginSearchNavigation();
     startClearTransition(() => {
       const q = initialQuery.trim();
       if (!q) {
         router.push("/search");
+        router.refresh();
       } else {
         router.push(`/search?query=${encodeURIComponent(q)}&page=1`);
+        router.refresh();
       }
       setStartDate("");
       setEndDate("");

@@ -2,6 +2,7 @@
 
 import AnalyticsCharts from "@/app/ui/analytics-charts";
 import AnalyticsDateRange from "@/app/ui/analytics-date-range";
+import { AnalyticsChartsSkeleton } from "@/app/ui/skeletons";
 import { Expense } from "@/app/lib/types";
 import React, { useState, useCallback, useEffect } from "react";
 
@@ -93,10 +94,7 @@ function AnalyticsPage() {
         />
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading expenses...</p>
-          </div>
+          <AnalyticsChartsSkeleton />
         ) : (
           <AnalyticsCharts
             expenses={expenses}
