@@ -1,5 +1,6 @@
 import { MongoClient, ObjectId } from "mongodb";
 import { withDatabaseOperation } from "./mongo";
+import { SALARY_MONTHLY_AMOUNT } from "./static";
 
 /**
  * Converts MongoDB documents to plain JavaScript objects
@@ -226,6 +227,17 @@ export const searchExpensesFiltered = async (
     totalCount: result.totalCount,
     totalAmount: Number(result.totalAmount) || 0,
   };
+};
+
+export const fetchMonthlySalaryAmount = async (monthKey: string): Promise<number> => {
+  const doc = await withDatabaseOperation(async function (client: MongoClient) {
+    const db = client.db("expense-tracker-db");
+    return db.collection("MonthlySalary").findOne({ monthKey });
+  });
+  if (doc && typeof doc === "object" && "amount" in doc && typeof doc.amount === "number") {
+    return doc.amount;
+  }
+  return SALARY_MONTHLY_AMOUNT;
 };
 
 export const fetchExpenseById = async (id: string) => {

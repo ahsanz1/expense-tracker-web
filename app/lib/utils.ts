@@ -34,6 +34,20 @@ export function getMonthOptions(count: number): { key: string; label: string }[]
   return out;
 }
 
+/** Build home page query string for month/source/editSalary filters */
+export function buildHomeHref(options: {
+  month?: string;
+  source?: string;
+  editSalary?: boolean;
+}): string {
+  const params = new URLSearchParams();
+  if (options.month) params.set("month", options.month);
+  if (options.source && options.source !== "Salary") params.set("source", options.source);
+  if (options.editSalary) params.set("editSalary", "1");
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
+}
+
 /** Converts a string to a URL-safe slug (e.g. "Food & Drinks" → "food-drinks"). */
 export function slugify(text: string): string {
   return text

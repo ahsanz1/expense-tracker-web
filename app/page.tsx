@@ -1,9 +1,8 @@
-import { fetchExpensesForMonth } from "./lib/data";
-import { EXPENSE_SOURCES, SALARY_MONTHLY_AMOUNT } from "./lib/static";
-import { slugify, amountToColor, getMonthYearFromKey, getCurrentMonthKey, getMonthOptions } from "./lib/utils";
+import { fetchExpensesForMonth, fetchMonthlySalaryAmount } from "./lib/data";
+import { EXPENSE_SOURCES } from "./lib/static";
+import { slugify, amountToColor, getMonthYearFromKey, getCurrentMonthKey, getMonthOptions, buildHomeHref } from "./lib/utils";
 import HomeCategoryGrid from "./ui/home-category-grid";
-import { HomeCategoryGridSkeleton } from "./ui/skeletons";
-import { Suspense } from "react";
+import SalarySummary from "./ui/salary-summary";
 
 function formatPkr(n: number): string {
   return n.toLocaleString("en-PK", { maximumFractionDigits: 0 });
@@ -26,22 +25,30 @@ function getMonthKeyFromParams(monthParam: string | string[] | undefined): strin
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ source?: string; month?: string }> | { source?: string; month?: string };
+  searchParams: Promise<{ source?: string; month?: string; editSalary?: string }> | { source?: string; month?: string; editSalary?: string };
 }) {
-  const params = (await Promise.resolve(searchParams).catch(() => ({}))) as { source?: string; month?: string };
+  const params = (await Promise.resolve(searchParams).catch(() => ({}))) as {
+    source?: string;
+    month?: string;
+    editSalary?: string;
+  };
   const selectedSource = getSourceFromParams(params.source);
   const monthKey = getMonthKeyFromParams(params.month);
+  const isEditingSalary = params.editSalary === "1";
   const monthYear = getMonthYearFromKey(monthKey);
   const month = monthYear?.month ?? new Date().toLocaleString("default", { month: "short" });
   const year = monthYear?.year ?? new Date().getFullYear();
   const monthLabel = `${month} ${year}`;
 
-  const allExpenses = (await fetchExpensesForMonth(month, year)) as {
-    category?: string;
-    amount: number;
-    source?: string;
-  }[];
-  const expensesForSource = allExpenses.filter(
+  const [expenses, totalSalary] = await Promise.all([
+    fetchExpensesForMonth(month, year) as Promise<
+      { category?: string; amount: number; source?: string }[]
+    >,
+    selectedSource === "Salary"
+      ? fetchMonthlySalaryAmount(monthKey)
+      : Promise.resolve(0),
+  ]);
+  const expensesForSource = expenses.filter(
     (e) => (e.source ?? "Salary") === selectedSource
   );
 
@@ -53,10 +60,10 @@ export default async function Home({
 
   let salaryRemaining = 0;
   if (selectedSource === "Salary") {
-    const salarySpent = allExpenses
+    const salarySpent = expenses
       .filter((e) => (e.source ?? "Salary") === "Salary")
       .reduce((acc, e) => acc + Number(e.amount), 0);
-    salaryRemaining = SALARY_MONTHLY_AMOUNT - salarySpent;
+    salaryRemaining = totalSalary - salarySpent;
   }
 
   const sorted = Array.from(byCategory.entries())
@@ -76,19 +83,35 @@ export default async function Home({
 
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <Suspense fallback={<HomeCategoryGridSkeleton showSalaryRemaining={selectedSource === "Salary"} />}>
-        <HomeCategoryGrid
-          items={items}
-          monthLabel={monthLabel}
-          monthKey={monthKey}
-          monthOptions={getMonthOptions(24)}
-          currentSource={selectedSource}
-          sources={[...EXPENSE_SOURCES]}
-          salaryRemaining={salaryRemaining}
-          salaryFormatted={formatPkr(salaryRemaining)}
-          showSalaryRemaining={selectedSource === "Salary"}
-        />
-      </Suspense>
+      <HomeCategoryGrid
+        items={items}
+        monthLabel={monthLabel}
+        monthKey={monthKey}
+        monthOptions={getMonthOptions(24)}
+        currentSource={selectedSource}
+        sources={[...EXPENSE_SOURCES]}
+        salarySection={
+          selectedSource === "Salary" ? (
+            <SalarySummary
+              monthKey={monthKey}
+              totalSalary={totalSalary}
+              totalSalaryFormatted={formatPkr(totalSalary)}
+              salaryRemainingFormatted={formatPkr(salaryRemaining)}
+              currentSource={selectedSource}
+              isEditing={isEditingSalary}
+              editHref={buildHomeHref({
+                month: monthKey,
+                source: selectedSource,
+                editSalary: true,
+              })}
+              cancelHref={buildHomeHref({
+                month: monthKey,
+                source: selectedSource,
+              })}
+            />
+          ) : null
+        }
+      />
     </main>
   );
 }

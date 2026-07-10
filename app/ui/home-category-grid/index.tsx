@@ -2,10 +2,9 @@
 
 import { CalendarDaysIcon } from "@heroicons/react/16/solid";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useState, useTransition } from "react";
 import CalendarModal from "../calendar-modal";
-import { HomeCategoryGridSkeleton } from "../skeletons";
 import "react-calendar/dist/Calendar.css";
 
 export type CategoryTotal = {
@@ -22,9 +21,7 @@ export default function HomeCategoryGrid({
   monthOptions,
   currentSource,
   sources,
-  salaryRemaining,
-  salaryFormatted,
-  showSalaryRemaining,
+  salarySection,
 }: {
   items: CategoryTotal[];
   monthLabel: string;
@@ -32,25 +29,18 @@ export default function HomeCategoryGrid({
   monthOptions: { key: string; label: string }[];
   currentSource: string;
   sources: readonly string[];
-  salaryRemaining: number;
-  salaryFormatted: string;
-  showSalaryRemaining: boolean;
+  salarySection?: React.ReactNode;
 }) {
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isNavigating, startTransition] = useTransition();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const updateParams = (updates: { source?: string; month?: string }) => {
-    const next = new URLSearchParams(searchParams.toString());
-    if (updates.source !== undefined) {
-      if (updates.source === "Salary") next.delete("source");
-      else next.set("source", updates.source);
-    }
-    if (updates.month !== undefined) {
-      if (updates.month) next.set("month", updates.month);
-      else next.delete("month");
-    }
+    const nextSource = updates.source ?? currentSource;
+    const nextMonth = updates.month ?? monthKey;
+    const next = new URLSearchParams();
+    if (nextSource !== "Salary") next.set("source", nextSource);
+    if (nextMonth) next.set("month", nextMonth);
     const query = next.toString();
     startTransition(() => {
       router.replace(query ? `/?${query}` : "/");
@@ -65,10 +55,6 @@ export default function HomeCategoryGrid({
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     updateParams({ month: e.target.value });
   };
-
-  if (isPending) {
-    return <HomeCategoryGridSkeleton showSalaryRemaining={showSalaryRemaining} />;
-  }
 
   return (
     <>
@@ -119,14 +105,18 @@ export default function HomeCategoryGrid({
         </div>
       </div>
 
-      {showSalaryRemaining && (
-        <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50/80 p-5">
-          <p className="text-sm font-medium text-gray-600 mb-0.5">Salary remaining (this month)</p>
-          <p className="text-2xl font-semibold text-black">PKR {salaryFormatted}</p>
-        </div>
-      )}
+      {salarySection}
 
-      {items.length === 0 ? (
+      {isNavigating ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-lg border border-gray-200 p-4 animate-pulse bg-gray-100 h-[88px]"
+            />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-600">
           No expenses recorded for this month yet.
         </div>

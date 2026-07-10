@@ -384,9 +384,9 @@ function HomeCategoryCardSkeleton() {
 
 /** Matches home page: header, month/source/date controls, salary card, category grid */
 export function HomeCategoryGridSkeleton({
-  showSalaryRemaining = true,
+  showSalarySummary = true,
 }: {
-  showSalaryRemaining?: boolean;
+  showSalarySummary?: boolean;
 }) {
   return (
     <div className="flex flex-col">
@@ -407,10 +407,16 @@ export function HomeCategoryGridSkeleton({
         </div>
       </div>
 
-      {showSalaryRemaining && (
-        <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50/80 p-5">
-          <Skeleton height={16} width={200} className="mb-1" />
-          <Skeleton height={32} width={160} />
+      {showSalarySummary && (
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-5">
+            <Skeleton height={16} width={180} className="mb-1" />
+            <Skeleton height={32} width={160} />
+          </div>
+          <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-5">
+            <Skeleton height={16} width={200} className="mb-1" />
+            <Skeleton height={32} width={160} />
+          </div>
         </div>
       )}
 

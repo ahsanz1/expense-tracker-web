@@ -8,6 +8,11 @@ import { withDatabaseOperation } from "./mongo";
 import { MongoClient, ObjectId } from "mongodb";
 import { dbCategories, DEFAULT_EXPENSE_SOURCE } from "./static";
 
+const MonthlySalarySchema = z.object({
+  monthKey: z.string().regex(/^\d{4}-\d{1,2}$/),
+  amount: z.coerce.number().positive(),
+});
+
 const SESSION_COOKIE = "expense_tracker_session";
 
 export async function loginAction(credentials: { email: string; password: string; _nonce?: number }) {
@@ -189,6 +194,48 @@ export async function updateExpenseAction(
   revalidatePath(`/expenses/${expenseDate}`);
   if (safeReturn) revalidatePath(safeReturn);
   redirect(safeReturn ?? `/expenses/${expenseDate}`);
+}
+
+export async function setMonthlySalaryAction(monthKey: string, amount: number) {
+  const { monthKey: key, amount: salary } = MonthlySalarySchema.parse({ monthKey, amount });
+
+  await withDatabaseOperation(async function (client: MongoClient) {
+    const db = client.db("expense-tracker-db");
+    await db.collection("MonthlySalary").updateOne(
+      { monthKey: key },
+      { $set: { monthKey: key, amount: salary } },
+      { upsert: true }
+    );
+  });
+
+  revalidatePath("/");
+  return { success: true as const };
+}
+
+export async function setMonthlySalaryFormAction(formData: FormData) {
+  const monthKey = formData.get("monthKey")?.toString() ?? "";
+  const amountRaw = formData.get("amount");
+  const source = formData.get("source")?.toString() ?? "Salary";
+  const { monthKey: key, amount: salary } = MonthlySalarySchema.parse({
+    monthKey,
+    amount: amountRaw,
+  });
+
+  await withDatabaseOperation(async function (client: MongoClient) {
+    const db = client.db("expense-tracker-db");
+    await db.collection("MonthlySalary").updateOne(
+      { monthKey: key },
+      { $set: { monthKey: key, amount: salary } },
+      { upsert: true }
+    );
+  });
+
+  revalidatePath("/");
+
+  const params = new URLSearchParams();
+  params.set("month", key);
+  if (source !== "Salary") params.set("source", source);
+  redirect(`/?${params.toString()}`);
 }
 
 // Helper function for updating a single field in an expense (used by scripts)
