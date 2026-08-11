@@ -408,9 +408,13 @@ export function HomeCategoryGridSkeleton({
       </div>
 
       {showSalarySummary && (
-        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-5">
             <Skeleton height={16} width={180} className="mb-1" />
+            <Skeleton height={32} width={160} />
+          </div>
+          <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-5">
+            <Skeleton height={16} width={160} className="mb-1" />
             <Skeleton height={32} width={160} />
           </div>
           <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-5">

@@ -58,13 +58,12 @@ export default async function Home({
     byCategory.set(cat, (byCategory.get(cat) ?? 0) + Number(e.amount));
   }
 
-  let salaryRemaining = 0;
-  if (selectedSource === "Salary") {
-    const salarySpent = expenses
-      .filter((e) => (e.source ?? "Salary") === "Salary")
-      .reduce((acc, e) => acc + Number(e.amount), 0);
-    salaryRemaining = totalSalary - salarySpent;
-  }
+  const totalSpent = expensesForSource.reduce(
+    (acc, e) => acc + Number(e.amount),
+    0
+  );
+  const salaryRemaining =
+    selectedSource === "Salary" ? totalSalary - totalSpent : 0;
 
   const sorted = Array.from(byCategory.entries())
     .map(([category, total]) => ({ category, total }))
@@ -91,25 +90,25 @@ export default async function Home({
         currentSource={selectedSource}
         sources={[...EXPENSE_SOURCES]}
         salarySection={
-          selectedSource === "Salary" ? (
-            <SalarySummary
-              monthKey={monthKey}
-              totalSalary={totalSalary}
-              totalSalaryFormatted={formatPkr(totalSalary)}
-              salaryRemainingFormatted={formatPkr(salaryRemaining)}
-              currentSource={selectedSource}
-              isEditing={isEditingSalary}
-              editHref={buildHomeHref({
-                month: monthKey,
-                source: selectedSource,
-                editSalary: true,
-              })}
-              cancelHref={buildHomeHref({
-                month: monthKey,
-                source: selectedSource,
-              })}
-            />
-          ) : null
+          <SalarySummary
+            monthKey={monthKey}
+            totalSalary={totalSalary}
+            totalSalaryFormatted={formatPkr(totalSalary)}
+            totalSpentFormatted={formatPkr(totalSpent)}
+            salaryRemainingFormatted={formatPkr(salaryRemaining)}
+            currentSource={selectedSource}
+            isEditing={isEditingSalary && selectedSource === "Salary"}
+            editHref={buildHomeHref({
+              month: monthKey,
+              source: selectedSource,
+              editSalary: true,
+            })}
+            cancelHref={buildHomeHref({
+              month: monthKey,
+              source: selectedSource,
+            })}
+            showSalaryCards={selectedSource === "Salary"}
+          />
         }
       />
     </main>
