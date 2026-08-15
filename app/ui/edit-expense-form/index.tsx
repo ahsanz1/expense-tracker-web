@@ -15,22 +15,33 @@ interface EditExpenseFormProps {
   returnTo?: string;
 }
 
+function toDateInputValue(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function EditExpenseForm({
   expense,
   expensesDate,
   expenseCategories = [],
   returnTo,
 }: EditExpenseFormProps) {
-  const date = new Date(expensesDate).toDateString();
   const sortedExpenseCategories = sortByKeyName(expenseCategories, "name");
-  
+
   const [formData, setFormData] = useState({
     title: expense.title?.toString() || "",
     amount: expense.amount?.toString() || "",
     category: expense.category || "",
     source: (expense as { source?: string }).source || DEFAULT_EXPENSE_SOURCE,
+    expenseDate: toDateInputValue(
+      (expense as { isoDate?: string }).isoDate || expensesDate
+    ),
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (field: keyof typeof formData, value: string) => {
@@ -41,7 +52,12 @@ function EditExpenseForm({
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (!formData.title.trim() || !formData.amount || !formData.category) {
+    if (
+      !formData.title.trim() ||
+      !formData.amount ||
+      !formData.category ||
+      !formData.expenseDate
+    ) {
       alert("Please fill in all fields.");
       setIsSubmitting(false);
       return;
@@ -53,6 +69,7 @@ function EditExpenseForm({
       formDataToSubmit.append("amount", formData.amount);
       formDataToSubmit.append("category", formData.category);
       formDataToSubmit.append("source", formData.source);
+      formDataToSubmit.append("expenseDate", formData.expenseDate);
       if (returnTo) formDataToSubmit.append("returnTo", returnTo);
 
       await updateExpenseAction(
@@ -69,14 +86,29 @@ function EditExpenseForm({
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold text-black mb-2">
-        Edit Expense - {date}
-      </h2>
+      <h2 className="text-2xl font-semibold text-black mb-2">Edit Expense</h2>
       <p className="text-gray-600 mb-6">Update expense details</p>
-      
+
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-y-6 border border-gray-200 rounded-lg p-6 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="expenseDate"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Date
+              </label>
+              <input
+                id="expenseDate"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                type="date"
+                value={formData.expenseDate}
+                onChange={(e) => handleChange("expenseDate", e.target.value)}
+                required
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="title"
@@ -178,4 +210,3 @@ function EditExpenseForm({
 }
 
 export default EditExpenseForm;
-

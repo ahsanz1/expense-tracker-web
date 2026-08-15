@@ -176,8 +176,18 @@ export async function updateExpenseAction(
   const safeReturn =
     returnToRaw != null && isSafeReturnTo(returnToRaw) ? returnToRaw.trim() : null;
 
-  const date = new Date(expenseDate).toDateString();
-  const isoDate = new Date(expenseDate).toISOString();
+  const dateRaw = formData.get("expenseDate")?.toString()?.trim() || expenseDate;
+  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateRaw);
+  if (!dateMatch) {
+    throw new Error("Invalid expense date");
+  }
+  const newExpenseDate = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+  const parsedDate = new Date(`${newExpenseDate}T12:00:00`);
+  if (Number.isNaN(parsedDate.getTime())) {
+    throw new Error("Invalid expense date");
+  }
+  const date = parsedDate.toDateString();
+  const isoDate = parsedDate.toISOString();
   const expenseSource = source || DEFAULT_EXPENSE_SOURCE;
 
   await withDatabaseOperation(async function (client: MongoClient) {
@@ -192,8 +202,11 @@ export async function updateExpenseAction(
   });
 
   revalidatePath(`/expenses/${expenseDate}`);
+  if (newExpenseDate !== expenseDate) {
+    revalidatePath(`/expenses/${newExpenseDate}`);
+  }
   if (safeReturn) revalidatePath(safeReturn);
-  redirect(safeReturn ?? `/expenses/${expenseDate}`);
+  redirect(safeReturn ?? `/expenses/${newExpenseDate}`);
 }
 
 export async function setMonthlySalaryAction(monthKey: string, amount: number) {

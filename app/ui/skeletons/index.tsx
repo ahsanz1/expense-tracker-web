@@ -222,7 +222,7 @@ export function EditExpenseFormSkeleton() {
       <Skeleton height={20} width={160} className="mb-6" />
       <div className="flex flex-col gap-y-6 border border-gray-200 rounded-lg p-6 bg-white">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i}>
               <Skeleton height={16} width={72} className="mb-2" />
               <Skeleton height={42} className="rounded-md" />
