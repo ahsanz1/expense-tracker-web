@@ -265,6 +265,7 @@ export function CategoriesPageSkeleton() {
         <Skeleton height={40} width={140} className="rounded-md" />
       </div>
       <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <Skeleton height={42} className="rounded-md mb-4" />
         <div className="space-y-4">
           {Array.from({ length: CATEGORY_LIST_SKELETON_COUNT }).map((_, i) => (
             <div key={i} className="border rounded-lg p-4 border-gray-200">

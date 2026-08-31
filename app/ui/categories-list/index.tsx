@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 
 interface CategoryWithAmount {
   name: string;
@@ -13,15 +13,47 @@ interface CategoriesListProps {
 }
 
 function CategoriesList({ categories }: CategoriesListProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+  );
+
   // Calculate amounts for percentile-based color coding
-  const amounts = categories.map((c) => c.amount).sort((a, b) => b - a);
+  const amounts = filteredCategories.map((c) => c.amount).sort((a, b) => b - a);
   const maxAmount = amounts[0] || 0;
+
+  const searchInput = (
+    <div className="mb-4">
+      <label
+        htmlFor="category-search"
+        className="block text-sm font-medium text-gray-700 mb-2"
+      >
+        Search categories
+      </label>
+      <input
+        id="category-search"
+        type="search"
+        value={searchQuery}
+        onChange={(event) => setSearchQuery(event.target.value)}
+        placeholder="Search by category name"
+        className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+      />
+    </div>
+  );
   
   if (maxAmount === 0) {
     // All categories have 0 amount
     return (
-      <div className="space-y-4">
-        {categories.map((category) => (
+      <div>
+        {searchInput}
+        {filteredCategories.length === 0 ? (
+          <div className="text-center py-12 text-gray-600">
+            No categories match your search.
+          </div>
+        ) : (
+          <div className="space-y-4">
+          {filteredCategories.map((category) => (
           <div
             key={category.name}
             className="border rounded-lg p-4 bg-gray-100 border-gray-300"
@@ -39,7 +71,9 @@ function CategoriesList({ categories }: CategoriesListProps) {
               </div>
             </div>
           </div>
-        ))}
+          ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -61,13 +95,14 @@ function CategoriesList({ categories }: CategoriesListProps) {
   };
 
   // Sort categories by amount (highest first)
-  const sortedCategories = [...categories].sort((a, b) => b.amount - a.amount);
+  const sortedCategories = [...filteredCategories].sort((a, b) => b.amount - a.amount);
 
   return (
-    <div className="space-y-4">
+    <div>
+      {searchInput}
       {sortedCategories.length === 0 ? (
         <div className="text-center py-12 text-gray-600">
-          <p>No categories found. Create your first category to get started.</p>
+          <p>No categories match your search.</p>
         </div>
       ) : (
         <>
