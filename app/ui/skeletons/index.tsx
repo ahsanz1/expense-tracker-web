@@ -318,8 +318,8 @@ function SearchFiltersSkeleton() {
 }
 
 /** Matches search page layout (filters, header, total, 10 rows, pagination). */
-export function SearchPageSkeleton({ hasQuery = true }: { hasQuery?: boolean }) {
-  if (!hasQuery) {
+export function SearchPageSkeleton({ showFilters = true }: { showFilters?: boolean; hasQuery?: boolean }) {
+  if (!showFilters) {
     return (
       <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-6 text-center">
         <Skeleton height={20} width="80%" className="mx-auto" />

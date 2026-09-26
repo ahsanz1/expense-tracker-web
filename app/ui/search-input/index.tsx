@@ -20,11 +20,14 @@ const SearchInput = () => {
 
   const handleSearch = (e?: React.MouseEvent) => {
     e !== undefined && e.preventDefault();
-    if (!searchTerm.trim()) return;
     const q = searchTerm.trim();
     beginSearchNavigation();
     startTransition(() => {
-      router.push(`/search?query=${encodeURIComponent(q)}&page=1`);
+      if (!q) {
+        router.push("/search");
+      } else {
+        router.push(`/search?query=${encodeURIComponent(q)}&page=1`);
+      }
       router.refresh();
     });
   };
@@ -38,7 +41,7 @@ const SearchInput = () => {
           if (e.key === "Enter") handleSearch();
         }}
         type="text"
-        placeholder="Search..."
+        placeholder="Search titles..."
         disabled={isPending || isSearchPending}
         className="w-full p-2 pl-4 pr-10 text-black bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent disabled:opacity-60"
       />

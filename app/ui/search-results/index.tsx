@@ -1,4 +1,5 @@
 import { Expense } from "@/app/lib/types";
+import { appendSearchParams } from "@/app/lib/search-utils";
 import Link from "next/link";
 import React from "react";
 import { PencilSquareIcon } from "@heroicons/react/16/solid";
@@ -6,12 +7,13 @@ import { PencilSquareIcon } from "@heroicons/react/16/solid";
 interface SearchResultsProps {
   hits: Expense[];
   query: string;
+  categories?: string[];
   totalCount: number;
   totalAmount: number;
   page: number;
   limit: number;
-  /** Current search params as record (e.g. { query: "x", page: "1" }) for building pagination URLs */
-  paramsRecord: Record<string, string | undefined>;
+  /** Current search params as record for building pagination URLs */
+  paramsRecord: Record<string, string | string[] | undefined>;
 }
 
 function toExpenseDateParam(isoOrDate: string | undefined): string {
@@ -26,6 +28,7 @@ function toExpenseDateParam(isoOrDate: string | undefined): string {
 export default function SearchResults({
   hits = [],
   query = "",
+  categories = [],
   totalCount,
   totalAmount,
   page,
@@ -38,20 +41,52 @@ export default function SearchResults({
 
   const buildPageUrl = (p: number) => {
     const params = new URLSearchParams();
-    Object.entries(paramsRecord).forEach(([k, v]) => {
-      if (v != null && v !== "") params.set(k, v);
-    });
+    appendSearchParams(params, paramsRecord);
     params.set("page", String(p));
     return `/search?${params.toString()}`;
   };
+
+  const buildReturnTo = () => {
+    const params = new URLSearchParams();
+    appendSearchParams(params, { ...paramsRecord, page: String(page) });
+    return `/search?${params.toString()}`;
+  };
+
+  const resultSummary = (() => {
+    if (query && categories.length > 0) {
+      return (
+        <>
+          Results for: <span className="font-medium text-black">&quot;{query}&quot;</span>
+          <span className="text-gray-500"> in </span>
+          <span className="font-medium text-black">{categories.join(", ")}</span>
+        </>
+      );
+    }
+    if (query) {
+      return (
+        <>
+          Results for: <span className="font-medium text-black">&quot;{query}&quot;</span>
+        </>
+      );
+    }
+    if (categories.length > 0) {
+      return (
+        <>
+          Results for categories:{" "}
+          <span className="font-medium text-black">{categories.join(", ")}</span>
+        </>
+      );
+    }
+    return null;
+  })();
 
   return (
     <>
       <div className="mb-6">
         <h1 className="text-3xl font-semibold text-black mb-2">Search Results</h1>
-        {query && (
+        {resultSummary && (
           <p className="text-gray-600">
-            Results for: <span className="font-medium text-black">&quot;{query}&quot;</span>
+            {resultSummary}
             {totalCount > 0 && (
               <span className="ml-2 text-gray-500">
                 ({totalCount} {totalCount === 1 ? "result" : "results"})
@@ -84,7 +119,7 @@ export default function SearchResults({
                 const expenseDate = toExpenseDateParam((h as any).isoDate ?? (h as any).date);
                 const editHref =
                   (h as any)._id && expenseDate
-                    ? `/expenses/${expenseDate}/${(h as any)._id}/edit?returnTo=${encodeURIComponent(`/search?${new URLSearchParams({ ...paramsRecord, page: String(page) }).toString()}`)}`
+                    ? `/expenses/${expenseDate}/${(h as any)._id}/edit?returnTo=${encodeURIComponent(buildReturnTo())}`
                     : null;
                 return (
                   <div

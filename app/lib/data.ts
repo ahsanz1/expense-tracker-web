@@ -151,23 +151,30 @@ export const searchExpenses = async (searchTerm: string) => {
 };
 
 export type SearchExpensesFilters = {
-  query: string;
+  query?: string;
   startDate?: string;
   endDate?: string;
-  category?: string;
+  categories?: string[];
   source?: string;
   page?: number;
   limit?: number;
 };
 
 function buildSearchMatch(filters: SearchExpensesFilters): Record<string, unknown> | null {
-  const { query, startDate, endDate, category, source } = filters;
+  const { query, startDate, endDate, categories, source } = filters;
   const q = (query ?? "").trim();
-  if (!q) return null;
+  const categoryList = (categories ?? [])
+    .map((c) => c.trim())
+    .filter(Boolean);
 
-  const match: Record<string, unknown> = {
-    title: { $regex: q, $options: "i" },
-  };
+  // Mode 1: title query (+ optional filters). Mode 2: categories only (no query).
+  if (!q && categoryList.length === 0) return null;
+
+  const match: Record<string, unknown> = {};
+
+  if (q) {
+    match.title = { $regex: q, $options: "i" };
+  }
 
   if (startDate || endDate) {
     match.isoDate = {};
@@ -180,8 +187,10 @@ function buildSearchMatch(filters: SearchExpensesFilters): Record<string, unknow
       (match.isoDate as Record<string, string>).$lte = end.toISOString();
     }
   }
-  if (category && category.trim()) {
-    match.category = category.trim();
+  if (categoryList.length === 1) {
+    match.category = categoryList[0];
+  } else if (categoryList.length > 1) {
+    match.category = { $in: categoryList };
   }
   if (source && source.trim()) {
     if (source.trim() === "Salary") {
